@@ -8,3 +8,8 @@ read_isi_file <- function(isi_file){
   tos_dataframe$IDWOS <- rownames(tos_dataframe)
   return(tos_dataframe)
 }
+
+split_references <- function(tos_dataframe, separator){
+  dataframe_splitted  <- tos_dataframe %>% separate_rows(CR, sep = separator)
+  return(dataframe_splitted)
+}
