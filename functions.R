@@ -26,3 +26,10 @@ format_dataframe <- function(tos_dataframe) {
   return(dataframe_formated)
 }
 
+graph_compute <- function (tos_dataframe){
+  edges <- dataframe_formated[!is.na(dataframe_formated$CR), c("IDWOS2", "CR")]
+  tos_graph <- graph.data.frame(edges, directed = TRUE)
+  return(tos_graph)
+}
+
+
