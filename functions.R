@@ -47,3 +47,16 @@ clean_graph <- function(tos_graph){
   
 }
 
+clean_graph <- function(tos_graph){
+  tos_degrees <- data.frame(node = V(graph = tos_graph)$name,
+                            indegree = degree(graph = tos_graph, mode = 'in'),
+                            outdegree = degree(graph = tos_graph, mode = 'out'),
+                            betweenness = betweenness(graph = tos_graph),
+                            directed = TRUE)
+  
+  tos_cleaned <- subset(tos_degrees,
+                        !((tos_degrees$indegree == 1) &
+                            (tos_degrees$outdegree== 0)))
+  return(tos_cleaned)
+}
+
