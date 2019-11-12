@@ -31,9 +31,53 @@ graph_compute <- function (tos_dataframe) {
 
 
 clean_graph <- function (tos_graph) {
-    tos_degrees <- data.frame(node = V(graph = tos_graph)$name, indegree = degree(graph = tos_graph, mode = 'in'), outdegree = degree(graph = tos_graph, mode = 'out'), betweenness = betweenness(graph = tos_graph), directed = TRUE)
+    tos_cleaned = delete.vertices(tos_graph, 
+                                  which(degree(tos_graph, mode = "in") == 1 & 
+                                            degree(tos_graph, mode = "out") == 0))
 
-    tos_cleaned <- subset(tos_degrees, !((tos_degrees$indegree == 1) & (tos_degrees$outdegree == 0)))
-    return(tos_cleaned)
+    tos_degrees <- data.frame(node = V(graph = tos_cleaned)$name, indegree = degree(graph = tos_cleaned, mode = 'in'), outdegree = degree(graph = tos_cleaned, mode = 'out'), betweenness = betweenness(graph = tos_cleaned), directed = TRUE)
+    
+    return(tos_degrees)
+    
+}
 
+tos <- function(tos_graph) {
+    network.metrics <- data.frame(
+        id = V(tos_graph)$name,
+        indegree = degree(tos_graph, mode = "in"),
+        outdegree = degree(tos_graph, mode = "out"),
+        bet = betweenness(tos_graph),
+        stringsAsFactors = FALSE
+    )
+    roots <- 
+        network.metrics %>% 
+        filter(outdegree == 0) %>% 
+        arrange(desc(indegree)) %>% 
+        # head(10) %>% 
+        mutate(tos = "raiz") %>% 
+        select(-indegree,
+               -outdegree,
+               -bet)
+    trunk <- 
+        network.metrics %>% 
+        arrange(desc(bet)) %>% 
+        head(10) %>% 
+        mutate(tos = "tronco") %>% 
+        select(-indegree,
+               -outdegree,
+               -bet)
+    leaves <- 
+        network.metrics %>% 
+        filter(indegree == 0) %>% 
+        arrange(desc(indegree)) %>% 
+        head(60) %>% 
+        mutate(tos = "hoja") %>% 
+        select(-indegree,
+               -outdegree,
+               -bet)
+    tos = rbind(roots, 
+                trunk,
+                leaves)
+    
+    return(tos)
 }
