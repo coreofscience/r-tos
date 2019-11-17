@@ -10,7 +10,7 @@ This repository contains enough code to create a Tree of Science. You just need 
  
   ```r
   source('tos.R')
-  filename <-  "savedrecs.txt"
+  filename <- "savedrecs.txt"
   tos_tree <- tos(filename)
   write.csv(tos_tree, file = "output.csv")
   ```
