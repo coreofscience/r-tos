@@ -10,5 +10,5 @@ tos_graph <- clean_graph(tos_graph)
 tos_structure <- tos(tos_graph)
 
 print("Successfully !!!")
-write.csv(tos_structure, file = "output.csv", row.names = FALSE)
+write.csv(tos_structure, file = "output.csv")
 
