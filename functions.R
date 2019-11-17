@@ -52,7 +52,7 @@ clean_graph <- function (tos_graph) {
 }
 
 
-tos <- function(tos_graph) {
+tos_labels <- function(tos_graph) {
     network.metrics <- data.frame(
         id = V(tos_graph)$name,
         indegree = degree(tos_graph, mode = "in"),
@@ -83,9 +83,9 @@ tos <- function(tos_graph) {
         select(-indegree,
                -outdegree,
                -bet)
-    tos = rbind(roots, 
-                trunk,
-                leaves)
+    tos_structure <- rbind(roots, 
+                           trunk,
+                           leaves)
     
-    return(tos)
+    return(tos_structure)
 }
