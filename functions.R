@@ -2,12 +2,14 @@ library("tidyverse")
 library("bibliometrix")
 library("igraph")
 
+
 read_isi_file <- function (isi_file) {
     text <-readFiles(isi_file)
     tos_dataframe <- convert2df(text, dbsource = "isi", format = "plaintext")
     tos_dataframe$IDWOS <-rownames(tos_dataframe)
     return(tos_dataframe)
 }
+
 
 split_references <- function (tos_dataframe, separator) {
     dataframe_splitted <- tos_dataframe %>% separate_rows(CR, sep = separator)
@@ -16,9 +18,16 @@ split_references <- function (tos_dataframe, separator) {
 
 
 format_dataframe <- function (tos_dataframe) {
-    dataframe_formated <- tos_dataframe %>% mutate(IDWOS2 = paste(IDWOS, sep = ", ", paste("V", sep = "", VL), paste("P", sep = "", BP), paste("DOI ", sep = "", DI)))
+    dataframe_formated <- tos_dataframe %>% mutate(
+        IDWOS2 = paste(IDWOS, sep = ", ", 
+            paste("V", sep = "", VL),
+            paste("P", sep = "", BP),
+            paste("DOI ", sep = "", DI)
+        )
+    )
     return(dataframe_formated)
 }
+
 
 graph_compute <- function (tos_dataframe) {
     edges <- tos_dataframe[
@@ -31,15 +40,17 @@ graph_compute <- function (tos_dataframe) {
 
 
 clean_graph <- function (tos_graph) {
-    tos_cleaned = delete.vertices(tos_graph, 
-                                  which(degree(tos_graph, mode = "in") == 1 & 
-                                            degree(tos_graph, mode = "out") == 0))
-
-    tos_degrees <- data.frame(node = V(graph = tos_cleaned)$name, indegree = degree(graph = tos_cleaned, mode = 'in'), outdegree = degree(graph = tos_cleaned, mode = 'out'), betweenness = betweenness(graph = tos_cleaned), directed = TRUE)
+    tos_cleaned = delete.vertices(
+        tos_graph, 
+        which(degree(tos_graph, mode = "in") == 1 &
+            degree(tos_graph, mode = "out") == 0
+        )
+    )
     
-    return(tos_degrees)
+    return(tos_cleaned)
     
 }
+
 
 tos <- function(tos_graph) {
     network.metrics <- data.frame(
@@ -53,7 +64,6 @@ tos <- function(tos_graph) {
         network.metrics %>% 
         filter(outdegree == 0) %>% 
         arrange(desc(indegree)) %>% 
-        # head(10) %>% 
         mutate(tos = "raiz") %>% 
         select(-indegree,
                -outdegree,
@@ -61,7 +71,6 @@ tos <- function(tos_graph) {
     trunk <- 
         network.metrics %>% 
         arrange(desc(bet)) %>% 
-        head(10) %>% 
         mutate(tos = "tronco") %>% 
         select(-indegree,
                -outdegree,
@@ -70,7 +79,6 @@ tos <- function(tos_graph) {
         network.metrics %>% 
         filter(indegree == 0) %>% 
         arrange(desc(indegree)) %>% 
-        head(60) %>% 
         mutate(tos = "hoja") %>% 
         select(-indegree,
                -outdegree,
