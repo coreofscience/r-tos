@@ -1,6 +1,6 @@
 # r-tos
 
-This repository contains enough code to create a Tree of Science. You just need to create an ISI Web of Knowledge seed, create a main.R file and run by using R. If you use RStudio Cloud, please follow this video.
+This repository contains enough code to create a Tree of Science. You just need to create an ISI Web of Knowledge seed, create a main.R file and run by using R. If you use RStudio Cloud, please follow [this video](https://www.youtube.com/watch?v=cdrhWCLPypU).
 
 ## Steps
 
