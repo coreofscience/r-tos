@@ -1,0 +1,44 @@
+---
+title: "ToS_R"
+output: html_notebook
+---
+
+En esta parte se cargan las librerias (No modifique nada. Solo corra el código)
+
+```{r}
+  library(stringr)
+  library(stringdist)
+  library(bibliometrix)
+  library(igraph)
+```
+
+
+En esta parte se cargan los datos, se procesan y visualizan 
+OJO. Aqui si modifique el nombre de su archivo txt donde dice: "su_archivo.txt"
+
+```{r}
+source("ToS_old_algorithm_DS.R")
+arbol <- tos_wos("data/Effectuation_419_2019.txt")
+
+```
+
+Para visualizar y guardar el archivo del árbol. 
+OJO. Modifique donde dice su_arbol y ponga un nombre a su arbol
+```{r}
+View(arbol$tos)
+write.csv(arbol$tos, file = "data/ToS_Effectuation_419_2019.csv")
+```
+
+
+Para guardar el archivo de la red
+OJO. Modifique donde dice su_red y ponga un nombre a su red
+```{r}
+write.graph(arbol$graph, file = "data/Red_Effectuation_419_2019.graphml", format = "graphml")
+```
+
+Finalmente, si esta herramienta le fue de utilidad le agradecemos citar los siguientes artículos.
+Con esto promueve la investigación y dice mucho de su etica como investigador:
+
+Zuluaga Martha, Robledo Sebastian, Osorio-Zuluaga German A, Yathe Laura, Gonzalez Diana, Taborda Gonzalo. Metabolomics and pesticides: systematic literature review using graph theory for analysis of references. Nova  [Internet]. 2016  June;  14( 25 ): 121-138. Available from: http://www.scielo.org.co/scielo.php?script=sci_arttext&pid=S1794-24702016000100010&lng=en.
+
+Landinez, D., Robledo, S., & Montoya, D. (2019). Executive function performance in patients with obesity: A systematic review. Psychologia, 13(2), 121–134. 
