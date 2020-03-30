@@ -6,34 +6,40 @@ output: html_notebook
 En esta parte se cargan las librerias (No modifique nada. Solo corra el código)
 
 ```{r}
-  library(stringr)
-  library(stringdist)
-  library(bibliometrix)
-  library(igraph)
+library(stringr)
+library(stringdist)
+library(bibliometrix)
+library(igraph)
+library(bibliometrix)
+library(tidyverse)
+library(roadoi) # titles
+library(fulltext) # Abstract
+library(tm)
+library(SnowballC)
+library(wordcloud)
+library(cluster)
 ```
-
 
 En esta parte se cargan los datos, se procesan y visualizan 
 OJO. Aqui si modifique el nombre de su archivo txt donde dice: "su_archivo.txt"
 
 ```{r}
 source("ToS_old_algorithm_DS.R")
-arbol <- tos_wos("data/Effectuation_419_2019.txt")
-
+  arbol <- tos_wos(c("data/Marketing Viral 189.txt"))
 ```
 
 Para visualizar y guardar el archivo del árbol. 
 OJO. Modifique donde dice su_arbol y ponga un nombre a su arbol
+
 ```{r}
 View(arbol$tos)
-write.csv(arbol$tos, file = "data/ToS_Effectuation_419_2019.csv")
+write.csv(arbol$tos, file = "data/Marketing Viral.csv")
 ```
-
 
 Para guardar el archivo de la red
 OJO. Modifique donde dice su_red y ponga un nombre a su red
 ```{r}
-write.graph(arbol$graph, file = "data/Red_Effectuation_419_2019.graphml", format = "graphml")
+write.graph(arbol$graph, file = "data/Marketing Viral.graphml", format = "graphml")
 ```
 
 Finalmente, si esta herramienta le fue de utilidad le agradecemos citar los siguientes artículos.
@@ -42,3 +48,190 @@ Con esto promueve la investigación y dice mucho de su etica como investigador:
 Zuluaga Martha, Robledo Sebastian, Osorio-Zuluaga German A, Yathe Laura, Gonzalez Diana, Taborda Gonzalo. Metabolomics and pesticides: systematic literature review using graph theory for analysis of references. Nova  [Internet]. 2016  June;  14( 25 ): 121-138. Available from: http://www.scielo.org.co/scielo.php?script=sci_arttext&pid=S1794-24702016000100010&lng=en.
 
 Landinez, D., Robledo, S., & Montoya, D. (2019). Executive function performance in patients with obesity: A systematic review. Psychologia, 13(2), 121–134. 
+
+Buitrago, S., Duque, P. L., & Robledo, S. (2020). Branding Corporativo: una revisión bibliográfica. ECONÓMICAS CUC, 41(1).
+
+# Perspectives from Gephi
+
+Cargando los datos
+
+```{r}
+df_clusters_1 <- 
+  read_csv("data/Cluster 1_Ramirez.csv") %>% 
+  select(v_name) %>% 
+  rename(ID_WOS = "v_name" ) 
+
+df_clusters_2 <- 
+  read_csv("data/Cluster_2_Toro.csv") %>% 
+  select(v_name) %>% 
+  rename(ID_WOS = "v_name" ) 
+
+df_clusters_3 <- 
+  read_csv("data/Cluster_3_Toro.csv") %>% 
+  select(v_name)%>% 
+  rename(ID_WOS = "v_name")
+```
+
+Registra el correo
+
+```{r}
+email <- "myemail@myu.com"
+```
+
+### Cluster 1
+
+```{r}
+raw_data_1 <- 
+  df_clusters_1 %>%
+  rename(id = "ID_WOS") %>%
+  mutate(id = str_to_lower(id)) %>%
+  dplyr::filter(grepl(".*doi", id)) 
+
+raw_data_1$doi <- sub(".*doi", "", raw_data_1$id)
+
+
+raw_data_1 <- 
+  raw_data_1 %>%
+  mutate(doi = str_trim(doi))
+
+df <- data.frame(titulo = as.character(),
+                 stringsAsFactors = FALSE)
+for (i in raw_data_1$doi) {
+  row = try(oadoi_fetch(dois = i,
+                        email = email),
+            TRUE)
+  if(isTRUE(class(row)=="try-error")) {next} else {
+    df_new = data.frame(titulo = row$title, 
+                        stringsAsFactors = FALSE)
+  }
+  
+  df = rbind(df_new, df)
+} 
+jeopCorpus <- Corpus(VectorSource(df$titulo %>% na.omit()))
+
+paperCorp <- jeopCorpus
+paperCorp <- tm_map(paperCorp, removePunctuation)
+paperCorp <- tm_map(paperCorp, removeNumbers)
+# added tolower
+paperCorp <- tm_map(paperCorp, content_transformer(tolower))
+paperCorp <- tm_map(paperCorp, removeWords, stopwords("english"))
+# moved stripWhitespace
+
+paperCorp <- tm_map(paperCorp, stripWhitespace)
+paperCorp <- tm_map(paperCorp, stemDocument)
+
+paperCorp_1 <- tm_map(paperCorp, removeWords, c("viral", 
+                                                "market"))
+
+nube1 <- wordcloud(paperCorp_1, min.freq = 1,
+                   max.words=50, random.order=FALSE, rot.per=0.35, 
+                   colors=brewer.pal(8, "Dark2"))
+```
+
+## Cluster 2
+
+```{r}
+raw_data_2 <- 
+  df_clusters_2 %>%
+  rename(id = "ID_WOS") %>%
+  mutate(id = str_to_lower(id))
+
+raw_data_1_2 <- 
+  raw_data_2 %>%
+  dplyr::filter(grepl(".*doi", id))
+
+raw_data_1_2$doi <- sub(".*doi", "", raw_data_1_2$id)
+
+
+raw_data_1_2 <- 
+  raw_data_1_2 %>%
+  mutate(doi = str_trim(doi))
+
+df_2 <- data.frame(titulo = as.character(),
+                   stringsAsFactors = FALSE)
+for (i in raw_data_1_2$doi) {
+  row = try(oadoi_fetch(dois = i,
+                        email = email),
+            TRUE)
+  if(isTRUE(class(row)=="try-error")) {next} else {
+    df_new = data.frame(titulo = row$title, 
+                        stringsAsFactors = FALSE)
+  }
+  
+  df_2 = rbind(df_new, df_2)
+}
+jeopCorpus_2 <- Corpus(VectorSource(df_2$titulo %>% na.omit()))
+
+paperCorp_2 <- jeopCorpus_2
+paperCorp_2 <- tm_map(paperCorp_2, removePunctuation)
+paperCorp_2 <- tm_map(paperCorp_2, removeNumbers)
+# added tolower
+paperCorp_2 <- tm_map(paperCorp_2, content_transformer(tolower))
+paperCorp_2 <- tm_map(paperCorp_2, removeWords, stopwords("english"))
+# moved stripWhitespace
+
+paperCorp_2 <- tm_map(paperCorp_2, stripWhitespace)
+paperCorp_2 <- tm_map(paperCorp_2, stemDocument)
+
+paperCorp_2 <- tm_map(paperCorp_2, removeWords, c("viral",
+                                                  "market"))
+
+nube2 <- wordcloud(paperCorp_2, min.freq = 1,
+                   max.words=50, random.order=FALSE, rot.per=0.35, 
+                   colors=brewer.pal(8, "Dark2"))
+```
+
+## Cluster 2
+
+```{r}
+raw_data_3 <- 
+  df_clusters_3 %>%
+  rename(id = "ID_WOS") %>%
+  mutate(id = str_to_lower(id))
+
+raw_data_1_3 <- 
+  raw_data_3 %>%
+  dplyr::filter(grepl(".*doi", id))
+
+raw_data_1_3$doi <- sub(".*doi", "", raw_data_1_3$id)
+
+
+raw_data_1_3 <- 
+  raw_data_1_3 %>%
+  mutate(doi = str_trim(doi))
+
+df_3 <- data.frame(titulo = as.character(),
+                   stringsAsFactors = FALSE)
+for (i in raw_data_1_3$doi) {
+  row = try(oadoi_fetch(dois = i,
+                        email = email),
+            TRUE)
+  if(isTRUE(class(row)=="try-error")) {next} else {
+    df_new = data.frame(titulo = row$title, 
+                        stringsAsFactors = FALSE)
+  }
+  
+  df_3 = rbind(df_new, df_3)
+}
+
+jeopCorpus_3 <- Corpus(VectorSource(df_3$titulo %>% na.omit()))
+
+paperCorp_3 <- jeopCorpus_3
+paperCorp_3 <- tm_map(paperCorp_3, removePunctuation)
+paperCorp_3 <- tm_map(paperCorp_3, removeNumbers)
+# added tolower
+paperCorp_3 <- tm_map(paperCorp_3, content_transformer(tolower))
+paperCorp_3 <- tm_map(paperCorp_3, removeWords, stopwords("english"))
+# moved stripWhitespace
+
+paperCorp_3 <- tm_map(paperCorp_3, stripWhitespace)
+paperCorp_3 <- tm_map(paperCorp_3, stemDocument)
+
+paperCorp_3 <- tm_map(paperCorp_3, removeWords, c("viral",
+                                                  "market"))
+
+nube3 <- wordcloud(paperCorp_3, min.freq = 1,
+                   max.words=50, random.order=FALSE, rot.per=0.35, 
+                   colors=brewer.pal(8, "Dark2"))
+```
+
