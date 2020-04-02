@@ -93,6 +93,10 @@ tos_wos <- function(file) {
                                c("id","outdegree")]
     current <- head(current[with(current, order(-outdegree)),], 60)
     
+    if(sum(network.metrics$bet) == 0 ) { 
+           stop("Your ToS does not have trunk, check the search out")} else {
+           
+    
     seminals$ToS <- "Raiz"
     seminals$order <- 1:length(seminals$id)
     structurals$ToS <- "Tronco"
@@ -101,6 +105,7 @@ tos_wos <- function(file) {
     current$order <- 1:length(current$id)
     
     tos <- rbind(seminals[,c(1,3,4)], structurals[,c(1,3,4)], current[,c(1,3,4)])
+           }
     
     # tos.1 <- merge(tos, wom.raw.1, by.x = "id", by.y = "SR", all.x = TRUE)
     
