@@ -25,7 +25,7 @@ OJO. Aqui si modifique el nombre de su archivo txt donde dice: "su_archivo.txt"
 
 ```{r}
 source("ToS_old_algorithm_DS.R")
-  arbol <- tos_wos(c("data/Marketing Viral 189.txt"))
+  arbol <- tos_wos(c("su_archivo.txt"))
 ```
 
 Para visualizar y guardar el archivo del árbol. 
@@ -33,13 +33,13 @@ OJO. Modifique donde dice su_arbol y ponga un nombre a su arbol
 
 ```{r}
 View(arbol$tos)
-write.csv(arbol$tos, file = "data/Marketing Viral.csv")
+write.csv(arbol$tos, file = "su_arbol.csv", row.names = F)
 ```
 
 Para guardar el archivo de la red
 OJO. Modifique donde dice su_red y ponga un nombre a su red
 ```{r}
-write.graph(arbol$graph, file = "data/Marketing Viral.graphml", format = "graphml")
+write.graph(arbol$graph, file = "su_red.graphml", format = "graphml")
 ```
 
 Finalmente, si esta herramienta le fue de utilidad le agradecemos citar los siguientes artículos.
