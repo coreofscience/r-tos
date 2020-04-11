@@ -42,26 +42,13 @@ tos_wos <- function(file) {
                                      sep = ", DOI "),
                                wom.raw.1$ID_WOS)
     
-    ref_1 <- data.frame(ID = character(), 
-                        REF = character(),
-                        stringsAsFactors = FALSE)
+    wom.raw.1 <- 
+        wom.raw.1 %>% 
+        separate_rows(CR, sep = "; ") %>% 
+        select(ID_WOS, CR) %>% 
+        filter(CR != "" & is.na(CR) == FALSE)
     
-    list_ids <- wom.raw.1$ID_WOS
-    
-    for (i in list_ids) {
-        row_1 = wom.raw.1[wom.raw.1$ID_WOS == i,]
-        newrow = data.frame(ID = i, strsplit(row_1$CR,
-                                             split = "; "),
-                            stringsAsFactors = FALSE)
-        colnames(newrow) = c("ID", "REF")
-        newrow$REF <- trim(newrow$REF)
-        ref_1 = rbind(ref_1, newrow)
-    }
-    
-    edgelist <- ref_1[ref_1$REF != "" & is.na(ref_1$REF) == FALSE
-                      ,c("ID", "REF")]
-    
-    graph <- graph.data.frame(edgelist)
+    graph <- graph.data.frame(wom.raw.1)
     graph.1 <- simplify(graph)
     graph.2 <- delete.vertices(graph.1, 
                                which(degree(graph.1, mode = "in") == 1 & 
