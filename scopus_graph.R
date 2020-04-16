@@ -20,13 +20,19 @@ tos_scopus <- function(file) {
            year = str_extract(CR, "[0-9]+")) %>%   # extracting year
     filter(!grepl(pattern = "[():[:digit:]]", lastname),
            str_length(year) == 4) %>% 
-    mutate(id_scopus = paste0(lastname, ", ", year, ",")) %>% 
+    mutate(id_scopus = paste0(lastname, ", ", year, ","),
+           SR = str_trim(SR)) %>% 
     select(SR, id_scopus)
   
-  graph <- 
+  graph_raw <- 
     graph.data.frame(data_raw_edgelist_scopus, 
                             directed = TRUE) %>% 
-    simplify() %>% 
+    simplify()
+  
+  graph <- 
+    delete.vertices(graph_raw, 
+                    which(degree(graph_raw, mode = "in") == 1 & 
+                            degree(graph_raw, mode = "out") == 0)) %>% 
     giant.component()
     
   network.metrics <- tibble(
