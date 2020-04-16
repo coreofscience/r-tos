@@ -7,5 +7,7 @@ network.metrics <- function(graph) {
     bet = betweenness(graph),
     stringsAsFactors = FALSE
   )
+   
+  network.metrics
   
 }
