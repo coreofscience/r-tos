@@ -29,6 +29,12 @@ wos_scopus <- function(wos_graph, scopus_graph) {
                                 directed = TRUE) %>% 
     simplify()
   
-  graph_tos
+  graph_tos_scopus <- 
+    delete.vertices(graph_tos, 
+                    which(degree(graph_tos, mode = "in") == 1 & 
+                            degree(graph_tos, mode = "out") == 0)) %>% 
+    giant.component()
+  
+  graph_tos_scopus
   
 }
