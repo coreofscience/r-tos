@@ -23,49 +23,54 @@ tos_wos <- function(file) {
     
     source("readFiles.R")
     
-    wom.raw.1 <- readISI(file)
+    data_wos <- readISI(file)
     
-    wom.raw.1$ID_WOS <- rownames(wom.raw.1)
-    wom.raw.1$ID_WOS <- ifelse(!is.na(wom.raw.1$VL), 
-                               paste(wom.raw.1$ID_WOS,
-                                     wom.raw.1$VL,
+    data_wos$ID_WOS <- rownames(data_wos)
+    
+    data_wos$ID_WOS <- ifelse(!is.na(data_wos$VL), 
+                               paste(data_wos$ID_WOS,
+                                     data_wos$VL,
                                      sep = ", V"),
-                               wom.raw.1$ID_WOS)
-    wom.raw.1$ID_WOS <- ifelse(!is.na(wom.raw.1$BP), 
-                               paste(wom.raw.1$ID_WOS,
-                                     wom.raw.1$BP,
-                                     sep = ", P"),
-                               wom.raw.1$ID_WOS)
-    wom.raw.1$ID_WOS <- ifelse(!is.na(wom.raw.1$DI),
-                               paste(wom.raw.1$ID_WOS,
-                                     wom.raw.1$DI,
-                                     sep = ", DOI "),
-                               wom.raw.1$ID_WOS)
+                              data_wos$ID_WOS)
     
-    wom.raw.1 <- 
-        wom.raw.1 %>% 
-        separate_rows(CR, sep = "; ") %>% 
+    data_wos$ID_WOS <- ifelse(!is.na(data_wos$BP), 
+                               paste(data_wos$ID_WOS,
+                                     data_wos$BP,
+                                     sep = ", P"),
+                              data_wos$ID_WOS)
+    
+    data_wos$ID_WOS <- ifelse(!is.na(data_wos$DI),
+                               paste(data_wos$ID_WOS,
+                                     data_wos$DI,
+                                     sep = ", DOI "),
+                              data_wos$ID_WOS)
+    
+    edgelist <- 
+        as.tibble(data_wos) %>% 
+        mutate(cited_references = CR) %>% 
+        separate_rows(CR, sep = ";") %>% 
         select(ID_WOS, CR) %>% 
         filter(CR != "" & is.na(CR) == FALSE)
     
-    graph <- graph.data.frame(wom.raw.1)
-    graph.1 <- simplify(graph)
-    graph.2 <- delete.vertices(graph.1, 
-                               which(degree(graph.1, mode = "in") == 1 & 
-                                         degree(graph.1, mode = "out") == 0))
+    graph <- 
+        graph.data.frame(edgelist) %>% 
+        simplify(graph)
+    
+    graph_1 <- delete.vertices(graph, 
+                               which(degree(graph, mode = "in") == 1 & 
+                                         degree(graph, mode = "out") == 0))
     giant.component <- function(graph) {
         cl <- clusters(graph)
         induced.subgraph(graph, which(cl$membership == which.max(cl$csize)))
     }
     
-    graph.3 <- giant.component(graph.2)
+    graph_2 <- giant.component(graph_1)
     
-    network.metrics <- data.frame(
-        id = V(graph.3)$name,
-        indegree = degree(graph.3, mode = "in"),
-        outdegree = degree(graph.3, mode = "out"),
-        bet = betweenness(graph.3),
-        stringsAsFactors = FALSE
+    network.metrics <- tibble(
+        id = V(graph_2)$name,
+        indegree = degree(graph_2, mode = "in"),
+        outdegree = degree(graph_2, mode = "out"),
+        bet = betweenness(graph_2)
     )
     
     seminals <- network.metrics[network.metrics$outdegree == 0,
@@ -98,8 +103,8 @@ tos_wos <- function(file) {
     
     # tos.2 <- tos.1[,c("id", "ToS","AU", "TI", "DI")]
     
-    list(df = wom.raw.1, 
-         graph = graph.3,
+    list(df = data_wos, 
+         graph = graph_2,
          net_metrics = network.metrics,
          tos = tos)
     

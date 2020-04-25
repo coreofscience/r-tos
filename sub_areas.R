@@ -10,4 +10,3 @@ modularity <- function(graph_tos) {
                     )
   graph_tos_sub_areas
 }
-
