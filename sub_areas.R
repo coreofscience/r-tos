@@ -1,10 +1,12 @@
-sub_areas <- function(graph_tos) {
+modularity <- function(graph_tos) {
   
-  library(reticulate)
-  py_install("networkx")
-  py_install("numpy")
-  py_run_string("import networkx as nx")
-  
-  py_run_string("my_python_array = np.array([2,4,6,8])")
-  
+  graph_tos_und = as.undirected(graph_tos,
+                                mode = "each")
+  sub_areas = cluster_louvain(graph_tos_scopus_undirected)
+  graph_tos_sub_areas <- 
+    graph_tos_und %>% 
+    set_vertex_attr(name = "sub_area",
+                    value = membership(sub_areas)
+                    )
+  graph_tos_sub_areas
 }
