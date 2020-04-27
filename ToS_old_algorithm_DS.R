@@ -51,7 +51,7 @@ tos_wos <- function(file) {
                               data_wos$ID_WOS)
     
     edgelist <- 
-        as.tibble(data_wos) %>% 
+        as_tibble(data_wos) %>% 
         mutate(cited_references = CR) %>% 
         separate_rows(CR, sep = ";") %>% 
         select(ID_WOS, CR) %>% 
