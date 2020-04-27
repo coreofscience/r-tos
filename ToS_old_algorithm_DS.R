@@ -14,12 +14,17 @@ if (!require(stringdist)) {
     install.packages("stringdist")
 }
 
+if (!require(tidyverse)) {
+    install.packages("tidyverse")
+}
+
 tos_wos <- function(file) { 
     
     library(stringr)
     library(stringdist)
     library(bibliometrix)
     library(igraph)
+    library(tidyverse)
     
     source("readFiles.R")
     
