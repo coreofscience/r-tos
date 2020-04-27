@@ -18,6 +18,8 @@ library(tm)
 library(SnowballC)
 library(wordcloud)
 library(cluster)
+library(purrr)
+library(tidyverse)
 ```
 
 En esta parte se cargan los datos, se procesan y visualizan 
@@ -55,9 +57,11 @@ Buitrago, S., Duque, P. L., & Robledo, S. (2020). Branding Corporativo: una revi
 
 Cargando los datos
 
+I can read several files in only one line
+
 ```{r}
 df_clusters_1 <- 
-  read_csv("data/Cluster 1_Ramirez.csv") %>% 
+  read_csv("data/Cluster_1.csv") %>% 
   select(v_name) %>% 
   rename(ID_WOS = "v_name" ) 
 
@@ -75,7 +79,7 @@ df_clusters_3 <-
 Registra el correo
 
 ```{r}
-email <- "myemail@myu.com"
+email <- "sebastian.robledo@gmail.com"
 ```
 
 ### Cluster 1
@@ -89,6 +93,38 @@ raw_data_1 <-
 
 raw_data_1$doi <- sub(".*doi", "", raw_data_1$id)
 
+safe_webscraping <- safely(oadoi_fetch)
+safe_webscraping_discard <- function(dois) {
+  map(raw_data_1$doi, 
+      safe_webscraping, 
+      email = email) %>% 
+    discard(is.null)
+}
+titles <- map(raw_data_1$doi,
+              safe_webscraping_discard)
+
+webscraping <- 
+  map(raw_data_1$doi[1], safe_webscraping, email = email) %>% 
+  dplyr::select(title)
+
+# https://cran.r-project.org/web/packages/roadoi/vignettes/intro.html
+
+# Datacamp
+
+url_tester <- function(url_list){
+  url_list %>%
+    # Map a version of read_lines() that otherwise returns 404
+    map( possibly(read_lines, otherwise = 404) ) %>%
+    # Set the names of the result
+    set_names( urls ) %>% 
+    # paste() and collapse each element
+    map(paste, collapse = " ") %>%
+    # Remove the 404 
+    keep(~ .x == 404) %>%
+    names() # Will return the names of the good ones
+}
+
+# https://cran.r-project.org/web/packages/httr/vignettes/quickstart.html
 
 raw_data_1 <- 
   raw_data_1 %>%
@@ -233,5 +269,20 @@ paperCorp_3 <- tm_map(paperCorp_3, removeWords, c("viral",
 nube3 <- wordcloud(paperCorp_3, min.freq = 1,
                    max.words=50, random.order=FALSE, rot.per=0.35, 
                    colors=brewer.pal(8, "Dark2"))
+```
+
+Test 
+
+```{r}
+test <- 
+roadoi::oadoi_fetch(dois = c("10.1186/s12864-016-2566-9",
+                             "10.1103/physreve.88.012814"), 
+                    email = "najko.jahn@gmail.com") %>%
+  dplyr::mutate(
+    urls = purrr::map(title, "url") %>% 
+                  purrr::map_if(purrr::is_empty, ~ NA_character_) %>% 
+                  purrr::flatten_chr()
+                ) %>%
+  .$urls
 ```
 
