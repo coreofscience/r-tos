@@ -1,0 +1,62 @@
+---
+title: "Cluster"
+output: html_document
+---
+```{r}
+  library(igraph)
+  library(tidyverse)
+  library(tidyr)
+  library(bibliometrix)
+  library(ggplot2)
+```
+
+Importando grafo.
+```{r}
+graph <- read_graph("data/su_grafo.graphml", format = "graphml")
+```
+
+Cargando subarea (comunidades) a grafo.
+```{r}
+sub_areas <- cluster_louvain(as.undirected(graph), weights = NULL)
+graph_1 <- 
+  graph %>%
+  set_vertex_attr(name = "sub_area",
+                  value = membership(sub_areas))
+```
+
+Recolectando datos (fecha).
+```{r}
+df_graph <- 
+  data.frame(vertices = V(graph_1)$name, 
+             sub_area = V(graph_1)$sub_area,
+             stringsAsFactors = TRUE) %>% 
+  arrange(desc(sub_area))
+df_graph$year <- str_extract(df_graph$vertices, "[0-9]+")
+```
+
+Producción por años.
+```{r}
+for (i in 1:length(unique(df_graph$sub_area))){
+  frecuency_sub_area <-
+    df_graph %>% 
+    filter(sub_area == i) %>% 
+    count(year) %>% 
+    na.omit()
+  names(frecuency_sub_area) <- c("Año", "Frecuencia")
+  
+  # write.csv(frecuency_sub_area, paste("data/produción por año/sub_area",
+  #                                     as.character(i), ".csv", sep = ""))
+  # Guarda producciones/año de las sub_areas.
+  
+  g <-
+    ggplot(frecuency_sub_area, aes(x=Año, y=Frecuencia, group=1)) +
+    geom_point() +
+    geom_line() +
+    geom_smooth(size=0.3) +
+    labs(title = paste("Producción de subarea_", as.character(i), sep = ""),
+         x = "Año",
+         y = "Frecuencia")
+  print(g)
+}
+```
+
