@@ -46,13 +46,13 @@ for (i in 1:length(unique(df_graph$sub_area))){
   
   # write.csv(frecuency_sub_area, paste("data/produción por año/sub_area",
   #                                     as.character(i), ".csv", sep = ""))
-  # Guarda producciones/año de las sub_areas.
+  # Guarda producciones/año de las sub_areas. Crear carpeta "data"
   
   g <-
     ggplot(frecuency_sub_area, aes(x=Año, y=Frecuencia, group=1)) +
     geom_point() +
     geom_line() +
-    geom_smooth(size=0.3) +
+    geom_smooth(method = "loess", formula = "y~x", size=0.3) +
     labs(title = paste("Producción de subarea_", as.character(i), sep = ""),
          x = "Año",
          y = "Frecuencia")
