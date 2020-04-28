@@ -44,11 +44,11 @@ for (i in 1:length(unique(df_graph$sub_area))){
     na.omit()
   names(frecuency_sub_area) <- c("Año", "Frecuencia")
   
-  # write.csv(frecuency_sub_area, paste("data/produción por año/sub_area",
+  # write.csv(frecuency_sub_area, paste("data/producción (csv)/sub_area",
   #                                     as.character(i), ".csv", sep = ""))
   # Guarda producciones/año de las sub_areas. Crear carpeta "data"
   
-  g <-
+  plot_subarea <-
     ggplot(frecuency_sub_area, aes(x=Año, y=Frecuencia, group=1)) +
     geom_point() +
     geom_line() +
@@ -57,6 +57,11 @@ for (i in 1:length(unique(df_graph$sub_area))){
          x = "Año",
          y = "Frecuencia")
   print(g)
+  
+  # ggsave(plot_subarea,
+  #        filename = paste("data/produccion (plot)/Producción de subarea_",
+  #                         as.character(i), ".png", sep = ""),
+  #        width = 10, height = 8, units = "cm", dpi = 96) #Guarda los graficos
 }
 ```
 
