@@ -12,7 +12,7 @@ output: html_document
 
 Importando grafo.
 ```{r}
-graph <- read_graph("data/su_grafo.graphml", format = "graphml")
+graph <- read_graph("data/graph_tos_scopus (1).graphml", format = "graphml")
 ```
 
 Cargando subarea (comunidades) a grafo.
@@ -24,7 +24,7 @@ graph_1 <-
                   value = membership(sub_areas))
 ```
 
-Recolectando datos (fecha).
+Recolectando datos (fecha y longitud de comunidades).
 ```{r}
 df_graph <- 
   data.frame(vertices = V(graph_1)$name, 
@@ -32,38 +32,38 @@ df_graph <-
              stringsAsFactors = TRUE) %>% 
   arrange(desc(sub_area))
 df_graph$year <- str_extract(df_graph$vertices, "[0-9]+")
+df_graph <- na.omit(df_graph)
+
+sizes_sub_areas <- 
+  data.frame(sizes(sub_areas)) %>% 
+  arrange(desc(Freq))
 ```
 
 Producción por años.
 ```{r}
+all_data <- 
+  data.frame(Year = c(min(df_graph$year):max(df_graph$year)),
+             stringsAsFactors = FALSE)
+names_all_data <- list("Year")
+
 for (i in 1:length(unique(df_graph$sub_area))){
   frecuency_sub_area <-
     df_graph %>% 
     filter(sub_area == i) %>% 
-    count(year) %>% 
-    na.omit()
+    count(year)
   names(frecuency_sub_area) <- c("Año", "Frecuencia")
   
-  # write.csv(frecuency_sub_area, paste("data/producción (csv)/sub_area",
-  #                                     as.character(i), ".csv", sep = ""))
-  # Guarda producciones/año de las sub_areas. Crear carpeta "data/producción (csv)".
+  frec_sub_area <- ifelse(all_data$Year %in% frecuency_sub_area$Año,
+                          frecuency_sub_area$Frecuencia, 0)
+  all_data <- cbind(all_data, frec_sub_area)
   
-  plot_subarea <-
-    ggplot(frecuency_sub_area, aes(x=Año, y=Frecuencia, group=1)) +
-    geom_point() +
-    geom_line() +
-    geom_smooth(method = "loess", formula = "y~x", size=0.3) +
-    labs(title = paste("Producción de subarea_", as.character(i), "(",
-                       min(frecuency_sub_area$Año), "-", max(frecuency_sub_area$Año), ")", sep = ""),
-         x = "Año",
-         y = "Frecuencia")
-  print(plot_subarea)
-  
-  # ggsave(plot_subarea,
-  #        filename = paste("data/produccion (plot)/Producción de subarea_",
-  #                         as.character(i), ".png", sep = ""),
-  #        width = 10, height = 8, units = "cm", dpi = 96)
-  # Guarda los graficos en carpeta "data/produccion (plot)".
+  names_all_data <- append(names_all_data, paste("production_sub_area", as.character(i), sep = ""))
 }
+names(all_data) <- names_all_data
+```
+
+Graficando grafos principales (mas grandes).
+```{r}
+
 ```
 
