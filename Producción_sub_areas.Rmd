@@ -52,18 +52,31 @@ for (i in 1:length(unique(df_graph$sub_area))){
     filter(sub_area == i) %>% 
     count(year)
   names(frecuency_sub_area) <- c("Año", "Frecuencia")
+  frecuency_sub_area$comunidades <- paste("sub_area", as.character(i), sep = "")
   
   frec_sub_area <- ifelse(all_data$Year %in% frecuency_sub_area$Año,
                           frecuency_sub_area$Frecuencia, 0)
   all_data <- cbind(all_data, frec_sub_area)
   
-  names_all_data <- append(names_all_data, paste("production_sub_area", as.character(i), sep = ""))
+  names_all_data <- append(names_all_data,
+                           paste("production_sub_area", as.character(i), sep = ""))
 }
 names(all_data) <- names_all_data
 ```
 
-Graficando grafos principales (mas grandes).
+Graficas de los clusters principales.
 ```{r}
+para_graficar <- all_data %>% 
+  select(Year, production_sub_area12, production_sub_area10,
+         production_sub_area9, production_sub_area4) %>% 
+  gather(key="sub_areas", value="frecuencia", 2:5)
 
+ggplot(para_graficar, aes(x=Year, y=frecuencia, color=sub_areas)) +
+  xlim(c(1940, 2020)) +
+  geom_point(size=0.6) +
+  geom_line() +
+  labs(title = "Producción sub_areas",
+       x = "Years",
+       y = "Frecuencia")
 ```
 
