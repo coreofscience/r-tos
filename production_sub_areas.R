@@ -42,7 +42,7 @@ production_sub_area <- function(graph){
   names(all_data) <- names_all_data
   
   all_data_largo <- all_data %>% 
-    gather(key="sub_areas", value="frecuencia", 2:length(sub_areas))
+    gather(key="sub_areas", value="frecuencia", 2:(length(sub_areas)+1))
   
   all_data_largo
 }
