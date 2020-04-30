@@ -19,6 +19,18 @@ forest_wos <- function(biblio_wos) {
     select(CR) %>% 
     distinct() 
   
+  unmatched_refs_dois <- 
+    unmatched_refs %>% 
+    mutate(dois = str_extract(CR, "10\\..*")) %>% 
+    na.omit() %>% 
+    mutate(dois = sub(", DOI.*", "", dois), 
+           dois = str_replace_all(dois, " ", "" ))
+
+  unmatched_refs_dois_full <- 
+    map(unmatched_refs_dois$dois, 
+        .f = safely(function(x) oadoi_fetch(x,
+                                            email = "sebastian.robledo@gmail.com")))
+  ####
   references_wos <- 
     str_split_fixed(unmatched_refs$CR, 
                     pattern = ", ",
