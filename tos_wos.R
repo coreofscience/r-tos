@@ -13,9 +13,9 @@ tos_wos <- function(biblio_wos) {
     select(ID_WOS, REFS_NESTED) %>% 
     unnest(REFS_NESTED)
   
-  unmatched_refs <- 
+  unmatched_refs_wos <- 
     edge_list_wos %>% 
-    anti_join(tos_wos_ref, 
+    anti_join(tos_wos_ref_wos, 
               by = c("CR" = "ID_WOS")) %>% 
     select(CR) %>% 
     set_names("ID_WOS") %>% 
@@ -26,11 +26,11 @@ tos_wos <- function(biblio_wos) {
            PY = as.numeric(str_trim(PY)))
   
   tos_wos_ref_cols <-
-    tos_wos_ref[0,] 
+    tos_wos_ref_wos[0,] 
   
   unmatched_refs_full <-
     complete(tos_wos_ref_cols,
-             unmatched_refs)
+             unmatched_refs_wos)
 
   tos_wos <- 
     tos_wos_ref %>% 
