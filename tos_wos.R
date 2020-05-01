@@ -8,13 +8,13 @@ tos_wos <- function(biblio_wos) {
     mutate(CR = biblio_wos$CR) %>% 
     select(ID_WOS, everything())
   
-  edge_list <- 
+  edge_list_wos <- 
     tos_wos_ref %>% 
     select(ID_WOS, REFS_NESTED) %>% 
     unnest(REFS_NESTED)
   
   unmatched_refs <- 
-    edge_list %>% 
+    edge_list_wos %>% 
     anti_join(tos_wos_ref, 
               by = c("CR" = "ID_WOS")) %>% 
     select(CR) %>% 
