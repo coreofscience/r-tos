@@ -29,7 +29,10 @@ forest_wos <- function(biblio_wos) {
   unmatched_refs_dois_full <- 
     map(unmatched_refs_dois$dois, 
         .f = safely(function(x) oadoi_fetch(x,
-                                            email = "sebastian.robledo@gmail.com")))
+                                            email = "sebastian.robledo@gmail.com"))) %>% 
+    map("result") %>% 
+    compact()
+
   ####
   references_wos <- 
     str_split_fixed(unmatched_refs$CR, 
