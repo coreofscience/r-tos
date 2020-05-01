@@ -1,16 +1,8 @@
 production_sub_area <- function(graph){
-  # library(igraph)
-  # library(tidyverse)
-  # library(tidyr)
-  # library(bibliometrix)
-  # library(ggplot2)
+
+  source('sub_areas.R')
+  graph_1 <- modularity(graph)
   
-  
-  sub_areas <- cluster_louvain(as.undirected(graph, mode = "each"), weights = NULL)
-  graph_1 <- 
-    graph %>%
-    set_vertex_attr(name = "sub_area",
-                    value = membership(sub_areas))
   df_graph <- 
     data.frame(vertices = V(graph_1)$name, 
                sub_area = V(graph_1)$sub_area,
@@ -25,7 +17,7 @@ production_sub_area <- function(graph){
                stringsAsFactors = FALSE)
   names_all_data <- list("Year")
   
-  for (i in 1:length(sub_areas)){
+  for (i in 1:length(unique(df_graph$sub_area))){
     frecuency_sub_area <-
       df_graph %>% 
       filter(sub_area == i) %>% 
@@ -42,7 +34,11 @@ production_sub_area <- function(graph){
   names(all_data) <- names_all_data
   
   all_data_largo <- all_data %>% 
-    gather(key="sub_areas", value="frecuencia", 2:(length(sub_areas)+1))
+    gather(key="sub_areas", value="frecuencia", 2:(length(unique(df_graph$sub_area))+1))
   
-  all_data_largo
+  len_comunities <- df_graph %>% group_by(sub_area) %>% tally()
+  
+  list(production = all_data_largo,
+       graph = graph_1,
+       length_comunities = len_comunities)
 }
