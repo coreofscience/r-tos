@@ -5,6 +5,7 @@ tos_wos <- function(biblio_wos) {
     separate_rows(CR, sep = ";") %>% # the CR data is removed here, something to improve strsplit could be an option
     nest(CR_NESTED = CR) %>% 
     mutate(CR = biblio_wos$CR) %>% 
+    separate_rows(CR, sep = ";") %>% 
     mutate(REF_ID_TOS = sub("^(\\S*\\s+\\S+\\s+\\S+).*",
                             "\\1", 
                             CR)) %>% 
