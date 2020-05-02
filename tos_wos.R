@@ -30,7 +30,7 @@ tos_wos <- function(biblio_wos) {
            PY = as.numeric(str_trim(PY)))
   
   tos_wos_ref_cols <-
-    tos_wos_ref[0,] 
+    tos_wos_ref_wos[0,] 
   
   unmatched_refs_full_wos <-
     complete(tos_wos_ref_cols,
