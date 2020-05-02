@@ -4,13 +4,7 @@ tos_wos <- function(biblio_wos) {
     as_tibble(biblio_wos) %>% 
     separate_rows(CR, sep = ";") %>% # the CR data is removed here, something to improve strsplit could be an option
     nest(CR_NESTED = CR) %>% 
-    mutate(CR = biblio_wos$CR) %>% 
-    separate_rows(CR, sep = ";") %>% 
-    mutate(REF_ID_TOS = sub("^(\\S*\\s+\\S+\\s+\\S+).*",
-                            "\\1", 
-                            CR)) %>% 
-    nest(REF_ID_TOS_NESTED = REF_ID_TOS) %>% 
-    mutate(CR = biblio_wos$CR) %>% 
+    mutate(CR = biblio_wos$CR) %>%
     select(ID_WOS, everything())
   
   edge_list_wos <- 
@@ -31,19 +25,19 @@ tos_wos <- function(biblio_wos) {
            PY = as.numeric(str_trim(PY)))
   
   tos_wos_ref_cols <-
-    tos_wos_ref_wos[0,] 
+    tos_wos_ref[0,] 
   
   unmatched_refs_full_wos <-
     complete(tos_wos_ref_cols,
              unmatched_refs_wos)
-
+  
   tos_wos <- 
     tos_wos_ref %>% 
     bind_rows(unmatched_refs_full_wos) %>% 
     mutate(ID_TOS = sub("^(\\S*\\s+\\S+\\s+\\S+).*", # removing strings after second comma 
-                               "\\1", 
-                               ID_WOS)
-           ) %>% 
+                        "\\1", 
+                        ID_WOS)
+    ) %>% 
     select(ID_TOS, everything()) # There is a mistake here - NA and NULL (REF)
   
   tos_wos  # We need to extract the year from this tibble
