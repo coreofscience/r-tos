@@ -4,17 +4,18 @@ author: "Angel"
 date: "29/4/2020"
 output: html_document
 ---
-Instalar paquetes.
+Cargar paquetes.
 ```{r}
   library(tidyr)
   library(bibliometrix)
   library(tibble)
   library(igraph)
+  library(ggplot2)
 ```
 
 Cargar consulta de WoS.
 ```{r}
-df_wos <- convert2df("f8417957-a805-489d-96e1-fc63ed9036e1.txt",
+df_wos <- convert2df(file = "data/savedrecs (78).txt",
                      dbsource = "isi",
                      format = "plaintext")
 
@@ -38,7 +39,6 @@ df_wos$ID_WOS <- ifelse(!is.na(df_wos$DI),
                         df_wos$ID_WOS)
 
 # Red de citaciones. 
-
 network_citation <- 
   as_tibble(df_wos) %>% 
   select(ID_WOS, CR, PY) %>% 
@@ -63,42 +63,45 @@ big_graph <- function(grafo){
 source('production_sub_areas.R')
 ```
 
-Comunidades de articulos mas viejos. Año 2007 (minimo)
+Evolución de las comunidades (y su producción) por año.
 ```{r}
 minimo <- min(unique(network_citation$year))
+maximo <- max(unique(network_citation$year))
 
-graph <-
-  network_citation %>% 
-  filter(year == minimo) %>% 
-  select(source, target) %>% 
-  graph.data.frame(directed = TRUE)
+evolution_production_cluster <- tibble()
+evolution_num_clusters <- tibble()
 
-graph <- big_graph(graph)
-prod_2008 <- production_sub_area(graph)
+for (i in minimo:maximo){
+  graph <-
+    network_citation %>% 
+    filter(year <= i) %>% 
+    select(source, target) %>% 
+    graph.data.frame(directed = TRUE)
+  
+  graph <- big_graph(graph)
+  prod_cluster <- production_sub_area(graph)
+  
+  evolution_num_clusters <- append(evolution_num_clusters,
+                                   length(prod_cluster$length_comunities$sub_area))
+  
+  ploting <-
+    ggplot(prod_cluster$production, aes(x=Year, y=frecuencia, color=sub_areas)) +
+      geom_point(size=0.6) +
+      geom_line() +
+      labs(title = paste("Producción sub_area", as.character(i), sep = ""),
+           x = "Years",
+           y = "Frecuencia")
+  #print(ploting)
+
+  names(prod_cluster) <- c(paste("Level_", as.character(i), "_production", sep = ""),
+                           paste("Level_", as.character(i), "_graph", sep = ""),
+                           paste("Level_", as.character(i), "_length", sep = ""))
+  
+  evolution_production_cluster <- append(evolution_production_cluster,
+                                         prod_cluster)
+}
+
+
 ```
 
-Años <= 2008
-```{r}
-graph <-
-  network_citation %>% 
-  filter(year <= minimo + 1) %>% 
-  select(source, target) %>% 
-  graph.data.frame(directed = TRUE) %>% 
-  simplify()
-
-graph <- big_graph(graph)
-prod_2008 <- production_sub_area(graph)
-
-```
-
-........Año máximo 2020
-```{r}
-graph <-
-  network_citation %>% 
-  select(source, target) %>% 
-  graph.data.frame(directed = TRUE)
-
-graph <- big_graph(graph)
-prod_2008 <- production_sub_area(graph)
-```
 
