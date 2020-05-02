@@ -68,8 +68,11 @@ Evolución de las comunidades (y su producción) por año.
 minimo <- min(unique(network_citation$year))
 maximo <- max(unique(network_citation$year))
 
-evolution_production_cluster <- tibble()
-evolution_num_clusters <- tibble()
+evol_production_comunities <- tibble()
+
+evol_num_comunities <- tibble(Year = c(minimo:maximo))
+evol_num_cl = c()
+
 
 for (i in minimo:maximo){
   graph <-
@@ -79,28 +82,36 @@ for (i in minimo:maximo){
     graph.data.frame(directed = TRUE)
   
   graph <- big_graph(graph)
-  prod_cluster <- production_sub_area(graph)
+  prod_comunities <- production_sub_area(graph)
   
-  evolution_num_clusters <- append(evolution_num_clusters,
-                                   length(prod_cluster$length_comunities$sub_area))
+  evol_num_cl <- append(evol_num_cl,
+                        length(prod_comunities$length_comunities$sub_area))
   
-  ploting <-
-    ggplot(prod_cluster$production, aes(x=Year, y=frecuencia, color=sub_areas)) +
+  ploting_evol_comunities <-
+    ggplot(prod_comunities$production, aes(x=Year, y=frecuencia, color=sub_areas)) +
       geom_point(size=0.6) +
       geom_line() +
       labs(title = paste("Producción sub_area", as.character(i), sep = ""),
            x = "Years",
            y = "Frecuencia")
-  #print(ploting)
+  print(ploting_evol_comunities)
 
-  names(prod_cluster) <- c(paste("Level_", as.character(i), "_production", sep = ""),
+  names(prod_comunities) <- c(paste("Level_", as.character(i), "_production", sep = ""),
                            paste("Level_", as.character(i), "_graph", sep = ""),
                            paste("Level_", as.character(i), "_length", sep = ""))
   
-  evolution_production_cluster <- append(evolution_production_cluster,
-                                         prod_cluster)
+  evol_production_comunities <- append(evol_production_comunities,
+                                       prod_comunities)
 }
 
+evol_num_comunities$Sub_areas <- evol_num_cl
+plot_num_comunities <- 
+  ggplot(evol_num_comunities, aes(x=Year, y=Sub_areas))+
+  geom_point()+
+  geom_line()+
+  labs(title = "Evolución del número de comunidades",
+       x = "Years")
+print(plot_num_comunities)
 
 ```
 
