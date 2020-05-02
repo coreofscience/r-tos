@@ -12,27 +12,13 @@ tos_wos <- function(biblio_wos) {
     mutate(CR = biblio_wos$CR) %>% 
     select(ID_WOS, everything())
   
-  
-  edgelist_wos_tos <- 
-    as_tibble(as_edgelist(wos_graph)) %>% 
-    rename(source = "V1",
-           target = "V2") %>% 
-    mutate(id_tos_source = sub("^(\\S*\\s+\\S+\\s+\\S+).*", # removing strings after second comma 
-                               "\\1", 
-                               edgelist_wos$source),
-           id_tos_target = sub("^(\\S*\\s+\\S+\\s+\\S+).*", # removing strings after second comma 
-                               "\\1", 
-                               edgelist_wos$target)) %>% 
-    select(id_tos_source, 
-           id_tos_target)
-  
-  edge_list_tos <- 
+  edge_list_wos <- 
     tos_wos_ref %>% 
-    select(ID_WOS, REFS_NESTED) %>% 
-    unnest(REFS_NESTED)
+    select(ID_WOS, CR_NESTED) %>% 
+    unnest(CR_NESTED)
   
-  unmatched_refs <- 
-    edge_list %>% 
+  unmatched_refs_wos <- 
+    edge_list_wos %>% 
     anti_join(tos_wos_ref, 
               by = c("CR" = "ID_WOS")) %>% 
     select(CR) %>% 
@@ -46,13 +32,13 @@ tos_wos <- function(biblio_wos) {
   tos_wos_ref_cols <-
     tos_wos_ref[0,] 
   
-  unmatched_refs_full <-
+  unmatched_refs_full_wos <-
     complete(tos_wos_ref_cols,
-             unmatched_refs)
+             unmatched_refs_wos)
 
   tos_wos <- 
     tos_wos_ref %>% 
-    bind_rows(unmatched_refs_full) %>% 
+    bind_rows(unmatched_refs_full_wos) %>% 
     mutate(ID_TOS = sub("^(\\S*\\s+\\S+\\s+\\S+).*", # removing strings after second comma 
                                "\\1", 
                                ID_WOS)
