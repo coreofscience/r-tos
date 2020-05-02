@@ -1,0 +1,104 @@
+---
+title: "Evolución de las comunidades"
+author: "Angel"
+date: "29/4/2020"
+output: html_document
+---
+Instalar paquetes.
+```{r}
+  library(tidyr)
+  library(bibliometrix)
+  library(tibble)
+  library(igraph)
+```
+
+Cargar consulta de WoS.
+```{r}
+df_wos <- convert2df("f8417957-a805-489d-96e1-fc63ed9036e1.txt",
+                     dbsource = "isi",
+                     format = "plaintext")
+
+df_wos$ID_WOS <- row.names(df_wos)
+
+df_wos$ID_WOS <- ifelse(!is.na(df_wos$VL),
+                        paste(df_wos$ID_WOS,
+                              df_wos$VL,
+                              sep = ", V"),
+                        df_wos$ID_WOS)
+
+df_wos$ID_WOS <- ifelse(!is.na(df_wos$BP),
+                        paste(df_wos$ID_WOS,
+                              df_wos$BP,
+                              sep = ", P"),
+                        df_wos$ID_WOS)
+
+df_wos$ID_WOS <- ifelse(!is.na(df_wos$DI),
+                        paste(df_wos$ID_WOS,
+                              sep = ", DOI "),
+                        df_wos$ID_WOS)
+
+# Red de citaciones. 
+
+network_citation <- 
+  as_tibble(df_wos) %>% 
+  select(ID_WOS, CR, PY) %>% 
+  na.omit() %>% 
+  separate_rows(CR, sep = ";") %>% 
+  arrange(PY)
+names(network_citation) <- c("source", "target", "year")
+```
+
+Cargar funciones componente gigante y production_sub_area.
+```{r}
+big_graph <- function(grafo){
+  graph_x <- simplify(grafo)
+  graph_x <- delete.vertices(graph_x,
+                             which(degree(graph_x, mode = "in") == 1 &
+                                   degree(graph_x, mode = "out") == 0))
+  cl <- clusters(graph_x)
+  graph_x <- induced.subgraph(graph_x,
+                              which(cl$membership == which.max(cl$csize)))
+}
+
+source('production_sub_areas.R')
+```
+
+Comunidades de articulos mas viejos. Año 2007 (minimo)
+```{r}
+minimo <- min(unique(network_citation$year))
+
+graph <-
+  network_citation %>% 
+  filter(year == minimo) %>% 
+  select(source, target) %>% 
+  graph.data.frame(directed = TRUE)
+
+graph <- big_graph(graph)
+prod_2008 <- production_sub_area(graph)
+```
+
+Años <= 2008
+```{r}
+graph <-
+  network_citation %>% 
+  filter(year <= minimo + 1) %>% 
+  select(source, target) %>% 
+  graph.data.frame(directed = TRUE) %>% 
+  simplify()
+
+graph <- big_graph(graph)
+prod_2008 <- production_sub_area(graph)
+
+```
+
+........Año máximo 2020
+```{r}
+graph <-
+  network_citation %>% 
+  select(source, target) %>% 
+  graph.data.frame(directed = TRUE)
+
+graph <- big_graph(graph)
+prod_2008 <- production_sub_area(graph)
+```
+
