@@ -16,46 +16,40 @@ wos_scopus <- function(wos_graph, scopus_graph) {
     select(ID_TOS,
            REFS_NESTED) %>% 
     unnest(REFS_NESTED) %>% 
-    mutate(TARGET = )
-    
-  
-  #####
-  
-  edgelist_wos_tos <- 
-    as_tibble(as_edgelist(wos_graph)) %>% 
-    rename(source = "V1",
-           target = "V2") %>% 
-    mutate(id_tos_source = sub("^(\\S*\\s+\\S+\\s+\\S+).*", # removing strings after second comma 
-                               "\\1", 
-                               edgelist_wos$source),
-           id_tos_target = sub("^(\\S*\\s+\\S+\\s+\\S+).*", # removing strings after second comma 
-                               "\\1", 
-                               edgelist_wos$target)) %>% 
-    select(id_tos_source, 
-           id_tos_target)
-   
-  
-  edgelist_scopus_tos <- 
-    as_tibble(as_edgelist(scopus_graph)) %>% 
-    rename(id_tos_source = "V1",
-           id_tos_target = "V2") 
+    mutate(lastname = sub("\\., .*", "", CR),
+           lastname = sub(",", "", lastname),
+           lastname = sub("\\.", "", lastname),# extracting lastnames,
+           year = str_extract(CR, "\\(([0-9]{4})\\)"),
+           year = str_remove_all(year, "\\(|\\)")) %>%   # extracting year needs to be improved
+    filter(!grepl(pattern = "[():[:digit:]]", lastname),
+           str_length(year) == 4) %>% 
+    mutate(CR = paste0(lastname, ", ", year, ",")) %>% 
+    select(ID_TOS, CR) %>% 
+    rename(SOURCE = "ID_TOS",
+           TARGET = "CR")
   
   edgelist_tos <- 
-    bind_rows(edgelist_wos_tos, 
-              edgelist_scopus_tos) %>% 
-    distinct()
+    bind_rows(edgelist_tos_wos, 
+              edgelist_tos_scopus) %>% 
+    distinct() %>% 
+    na.omit()
   
   graph_tos <- 
-    graph.data.frame(edgelist_tos, 
-                                directed = TRUE) %>% 
+    graph.data.frame(edgelist_tos,
+                     directed = TRUE) %>% 
     simplify()
   
-  graph_tos_scopus <- 
+  giant.component <- function(graph) {
+    cl <- clusters(graph)
+    induced.subgraph(graph, which(cl$membership == which.max(cl$csize)))
+  }
+  
+  graph_wos_scopus <- 
     delete.vertices(graph_tos, 
                     which(degree(graph_tos, mode = "in") == 1 & 
                             degree(graph_tos, mode = "out") == 0)) %>% 
     giant.component()
   
-  graph_tos_scopus
+  graph_wos_scopus
   
 }
