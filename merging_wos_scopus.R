@@ -11,22 +11,36 @@ wos_scopus <- function(wos_graph, scopus_graph) {
     select(-CR) %>% 
     rename(SOURCE = "ID_TOS")
   
+  edgelist_tos_wos_year <- 
+    edgelist_tos_wos %>% 
+    left_join(tos_wos %>% 
+                select(ID_TOS, 
+                       PY),
+              by = c("SOURCE" = "ID_TOS"))
+  
   edgelist_tos_scopus <- 
-    tos_scopus %>% 
+    as_tibble(biblio_scopus) %>% 
+    mutate(ID_TOS = str_extract(SR, ".*,")) %>% 
+    separate_rows(CR, sep = "; ") %>% 
     select(ID_TOS,
-           REFS_NESTED) %>% 
-    unnest(REFS_NESTED) %>% 
+           CR,
+           PY) %>% 
     mutate(lastname = sub("\\., .*", "", CR),
            lastname = sub(",", "", lastname),
            lastname = sub("\\.", "", lastname),# extracting lastnames,
            year = str_extract(CR, "\\(([0-9]{4})\\)"),
-           year = str_remove_all(year, "\\(|\\)")) %>%   # extracting year needs to be improved
+           year = str_remove_all(year, "\\(|\\)")) %>% 
     filter(!grepl(pattern = "[():[:digit:]]", lastname),
            str_length(year) == 4) %>% 
     mutate(CR = paste0(lastname, ", ", year, ",")) %>% 
-    select(ID_TOS, CR) %>% 
-    rename(SOURCE = "ID_TOS",
-           TARGET = "CR")
+    select(ID_TOS, CR, PY)
+  
+  edgelist_tos_scopus_year <- 
+    edgelist_tos_scopus %>% 
+    left_join(tos_wos %>% 
+                select(ID_TOS, 
+                       PY),
+              by = c("SOURCE" = "ID_TOS"))
   
   edgelist_tos <- 
     bind_rows(edgelist_tos_wos, 
