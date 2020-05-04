@@ -1,4 +1,4 @@
-wos_scopus <- function(wos_graph, scopus_graph) {
+wos_scopus <- function(tos_wos, tos_scopus) {
   
   edgelist_tos_wos <- 
     tos_wos %>% 
@@ -11,32 +11,41 @@ wos_scopus <- function(wos_graph, scopus_graph) {
     select(-CR) %>% 
     rename(SOURCE = "ID_TOS")
   
-  edgelist_tos_scopus <- 
-    tos_scopus %>% 
+  edgelist_tos_wos_year <- 
+    edgelist_tos_wos %>% 
+    left_join(tos_wos %>% 
+                select(ID_TOS, 
+                       PY),
+              by = c("SOURCE" = "ID_TOS"))
+  
+  edgelist_tos_scopus_year <- 
+    as_tibble(biblio_scopus) %>% 
+    mutate(ID_TOS = str_extract(SR, ".*,")) %>% 
+    separate_rows(CR, sep = "; ") %>% 
     select(ID_TOS,
-           REFS_NESTED) %>% 
-    unnest(REFS_NESTED) %>% 
+           CR,
+           PY) %>% 
     mutate(lastname = sub("\\., .*", "", CR),
            lastname = sub(",", "", lastname),
            lastname = sub("\\.", "", lastname),# extracting lastnames,
            year = str_extract(CR, "\\(([0-9]{4})\\)"),
-           year = str_remove_all(year, "\\(|\\)")) %>%   # extracting year needs to be improved
+           year = str_remove_all(year, "\\(|\\)")) %>% 
     filter(!grepl(pattern = "[():[:digit:]]", lastname),
            str_length(year) == 4) %>% 
     mutate(CR = paste0(lastname, ", ", year, ",")) %>% 
-    select(ID_TOS, CR) %>% 
+    select(ID_TOS, CR, PY) %>% 
     rename(SOURCE = "ID_TOS",
            TARGET = "CR")
   
   edgelist_tos <- 
-    bind_rows(edgelist_tos_wos, 
-              edgelist_tos_scopus) %>% 
+    bind_rows(edgelist_tos_wos_year, 
+              edgelist_tos_scopus_year) %>% 
     distinct() %>% 
     na.omit()
   
   graph_tos <- 
-    graph.data.frame(edgelist_tos,
-                     directed = TRUE) %>% 
+    graph_from_data_frame(edgelist_tos,
+                          directed = TRUE) %>% 
     simplify()
   
   giant.component <- function(graph) {
