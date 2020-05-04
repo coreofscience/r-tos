@@ -1,5 +1,26 @@
 wos_scopus <- function(wos_graph, scopus_graph) {
   
+  edgelist_tos_wos <- 
+    tos_wos %>% 
+    select(ID_TOS, 
+           CR_NESTED) %>% 
+    unnest(CR_NESTED) %>% 
+    mutate(TARGET = sub("^(\\S*\\s+\\S+\\s+\\S+).*", # removing strings after second comma 
+                        "\\1",
+                        CR)) %>% 
+    select(-CR) %>% 
+    rename(SOURCE = "ID_TOS")
+  
+  edgelist_tos_scopus <- 
+    tos_scopus %>% 
+    select(ID_TOS,
+           REFS_NESTED) %>% 
+    unnest(REFS_NESTED) %>% 
+    mutate(TARGET = )
+    
+  
+  #####
+  
   edgelist_wos_tos <- 
     as_tibble(as_edgelist(wos_graph)) %>% 
     rename(source = "V1",
