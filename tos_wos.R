@@ -22,7 +22,11 @@ tos_wos <- function(biblio_wos) {
     mutate(PY = str_extract(ID_WOS, 
                             ", [0-9]{4},"),
            PY = str_remove_all(PY, ","),
-           PY = as.numeric(str_trim(PY)))
+           PY = as.numeric(str_trim(PY))) %>% 
+    na.omit() %>% 
+    dplyr::filter(grepl('^([a-zA-Z]+ [a-zA-Z]+, [0-9]{4}, )', 
+                                 ID_WOS)) %>% 
+    dplyr::filter(!grepl(""))
   
   tos_wos_ref_cols <-
     tos_wos_ref[0,] 
