@@ -9,6 +9,7 @@ production_sub_area <- function(graph){
                stringsAsFactors = TRUE) %>% 
     arrange(desc(sub_area))
   df_graph$year <- str_extract(df_graph$vertices, "[0-9]+")
+  df_graph <- filter(df_graph, year >= 1900)
   df_graph <- na.omit(df_graph)
   
   
