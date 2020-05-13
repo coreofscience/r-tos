@@ -53,7 +53,9 @@ tos_wos <- function(file) {
     edgelist <- 
         as_tibble(data_wos) %>% 
         mutate(cited_references = CR) %>% 
-        separate_rows(CR, sep = ";") %>% 
+        separate_rows(CR, sep = ";") %>%
+        filter(!grepl(pattern = "^[0-9].*",
+                      CR)) %>% 
         select(ID_WOS, CR) %>% 
         filter(CR != "" & is.na(CR) == FALSE)
     
