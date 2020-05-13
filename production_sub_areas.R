@@ -1,8 +1,10 @@
 production_sub_area <- function(graph){
-
+  
+  ####Agregar atributo sub_area.
   source('sub_areas.R')
   graph_1 <- modularity(graph)
   
+  ####Recolectar datos de producción.
   df_graph <- 
     data.frame(vertices = V(graph_1)$name, 
                sub_area = V(graph_1)$sub_area,
@@ -32,14 +34,46 @@ production_sub_area <- function(graph){
     names_all_data <- append(names_all_data,
                              paste("production_sub_area", as.character(i), sep = ""))
   }
+  
   names(all_data) <- names_all_data
   
-  all_data_largo <- all_data %>% 
+  all_data <-
+    all_data %>% 
     gather(key="sub_areas", value="frecuencia", 2:(length(unique(df_graph$sub_area))+1))
   
-  len_comunities <- df_graph %>% group_by(sub_area) %>% tally()
+  ####Tamaño de comunidades.
+  len_comunities <- 
+    df_graph %>% 
+    group_by(sub_area) %>% 
+    tally()
   
-  list(production = all_data_largo,
+  
+  #####Codigo para graficar las tres principales (mas grandes) comunidades.
+  big_comunities <- 
+    len_comunities %>%
+    arrange(desc(n))
+  
+  comunity1 <- paste("production_sub_area", as.character(big_comunities$sub_area[1]), sep = "")
+  comunity2 <- paste("production_sub_area", as.character(big_comunities$sub_area[2]), sep = "")
+  comunity3 <- paste("production_sub_area", as.character(big_comunities$sub_area[3]), sep = "")
+  
+  para_graficar <-
+    all_data[all_data$sub_areas == comunity1
+             | all_data$sub_areas == comunity2
+             | all_data$sub_areas == comunity3, ]
+  
+  ploting <-
+    ggplot(para_graficar, aes(x=Year, y=frecuencia, color=sub_areas)) +
+    xlim(c(1990, 2020)) +
+    geom_point(size=0.6) +
+    geom_line() +
+    labs(title = "Producción sub_areas",
+         x = "Years",
+         y = "Frecuencia")
+
+  
+  list(production = all_data,
        graph = graph_1,
-       length_comunities = len_comunities)
+       length_comunities = len_comunities,
+       plot = ploting)
 }
