@@ -57,7 +57,9 @@ tos_wos <- function(file) {
         filter(!grepl(pattern = "^[0-9].*",
                       CR)) %>% 
         select(ID_WOS, CR) %>% 
-        filter(CR != "" & is.na(CR) == FALSE)
+        filter(CR != "" & is.na(CR) == FALSE) %>% 
+        mutate(ID_WOS = str_to_upper(ID_WOS),
+               CR = str_to_upper(CR))
     
     graph <- 
         graph.data.frame(edgelist) %>% 
