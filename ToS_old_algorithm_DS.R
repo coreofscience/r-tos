@@ -59,7 +59,8 @@ tos_wos <- function(file) {
         select(ID_WOS, CR) %>% 
         filter(CR != "" & is.na(CR) == FALSE) %>% 
         mutate(ID_WOS = str_to_upper(ID_WOS),
-               CR = str_to_upper(CR))
+               CR = str_to_upper(CR)) %>% 
+        unique()
     
     graph <- 
         graph.data.frame(edgelist) %>% 
