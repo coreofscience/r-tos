@@ -1,0 +1,13 @@
+---
+title: "Scopus cienciometría"
+output: html_notebook
+---
+
+En esta parte se carga el archivo
+
+```{r message=FALSE, warning=FALSE}
+source("scripts/scopus.R")
+arbol <- tos_scopus("data/scientometrics_465.bib")
+```
+
+

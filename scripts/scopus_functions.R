@@ -60,7 +60,17 @@ graph_scopus <- function (edge_list) {
     induced.subgraph(graph, which(cl$membership == which.max(cl$csize)))
   }
   
-  graph <- giant.component(graph_cleaned)
+  graph_gc <- giant.component(graph_cleaned)
+  
+  subareas <- 
+    as.undirected(graph_gc,
+                  mode = "each") %>% 
+    cluster_louvain()
+  
+  graph <- 
+    graph_gc %>% 
+    set_vertex_attr(name = "sub_area",
+                    value = membership(subareas))
   
   return(graph)
 }
@@ -113,25 +123,11 @@ tos_labels <- function(graph) {
   return(tos_structure)
 }
 
-sub_areas_graph <- function (graph) {
-  subareas <- 
-    as.undirected(graph,
-                  mode = "each") %>% 
-    cluster_louvain()
-  
-  graph_subareas <- 
-    graph %>% 
-    set_vertex_attr(name = "sub_area",
-                    value = membership(subareas))
-  
-  return(graph_subareas)
-}
-
-sub_area <- function (graph_subareas) {
+sub_area <- function (graph) {
   # Identify the first three clusters
   subareas_3 <- 
     tibble(
-      subarea = V(graph_subareas)$sub_area) %>% 
+      subarea = V(graph)$sub_area) %>% 
     group_by(subarea) %>% 
     count() %>% 
     arrange(desc(n)) %>%  
@@ -139,8 +135,8 @@ sub_area <- function (graph_subareas) {
     select(subarea)
   
   graph_subarea_1 <- 
-    graph_subareas %>% 
-    delete_vertices(V(graph_subareas)$sub_area != subareas_3$subarea[1])
+    graph %>% 
+    delete_vertices(V(graph)$sub_area != subareas_3$subarea[1])
   
   sub_area_net_metrics_1 <-
     tibble(
@@ -153,8 +149,8 @@ sub_area <- function (graph_subareas) {
     )
 
   graph_subarea_2 <- 
-    graph_subareas %>% 
-    delete_vertices(V(graph_subareas)$sub_area != subareas_3$subarea[2])
+    graph %>% 
+    delete_vertices(V(graph)$sub_area != subareas_3$subarea[2])
   
   sub_area_net_metrics_2 <-
     tibble(
@@ -167,8 +163,8 @@ sub_area <- function (graph_subareas) {
     )
   
   graph_subarea_3 <- 
-    graph_subareas %>% 
-    delete_vertices(V(graph_subareas)$sub_area != subareas_3$subarea[3])
+    graph %>% 
+    delete_vertices(V(graph)$sub_area != subareas_3$subarea[3])
   
   sub_area_net_metrics_3 <-
     tibble(
@@ -179,4 +175,20 @@ sub_area <- function (graph_subareas) {
                          mode = "out"),
       bet = betweenness(graph_subarea_3)
     )
+  
+  subareas_plot <-
+    tibble(subareas = V(graph)$sub_area) %>% 
+    group_by(subareas) %>%
+    count() %>%
+    arrange(desc(n)) %>% 
+    ggplot(aes(x = reorder(subareas, n), y = n)) + 
+    geom_point() +
+    xlab("subareas") +
+    ylab("papers") +
+    ggtitle("Relationship of subareas by size")
+  
+  list(subarea_1 = sub_area_net_metrics_1,
+         subarea_2 = sub_area_net_metrics_2,
+         subarea_3 = sub_area_net_metrics_3,
+         tipping_poing = subareas_plot)
 }
