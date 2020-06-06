@@ -167,7 +167,7 @@ tos_labels <- function(graph, titles) {
   return(tos_structure)
 }
 
-sub_area <- function (graph) {
+sub_area <- function (graph, titles) {
   # Identify the first three clusters
   subareas_3 <- 
     tibble(
@@ -369,8 +369,8 @@ sub_area <- function (graph) {
                                                 "green"))
   
   list(subarea_1 = tos_structure_1,
-         subarea_2 = tos_structure_1,
-         subarea_3 = tos_structure_1,
+         subarea_2 = tos_structure_2,
+         subarea_3 = tos_structure_3,
          tipping_poing = subareas_plot,
        graph_subareas_network = graph_subareas_plot)
 }
@@ -406,9 +406,9 @@ importance_bibliometrix <- function (scopus_dataframe) {
        journals_pccion = journals_pccion)
 }
 
-wordclouds <- function (tos_structure_1, tos_structure_2, tos_structure_3) {
+wordclouds <- function (subarea_1, subarea_2, subarea_3) {
   
-  jeopCorpus <- Corpus(VectorSource(tos_structure_1$TI %>% na.omit()))
+  jeopCorpus <- Corpus(VectorSource(subarea_1$TI %>% na.omit()))
   
   paperCorp <- jeopCorpus
   paperCorp <- tm_map(paperCorp, removePunctuation)
@@ -424,11 +424,7 @@ wordclouds <- function (tos_structure_1, tos_structure_2, tos_structure_3) {
   paperCorp_1 <- tm_map(paperCorp, removeWords, c("viral", 
                                                   "market"))
   
-  nube1 <- wordcloud(paperCorp_1, min.freq = 1,
-                     max.words=50, random.order=FALSE, rot.per=0.35, 
-                     colors=brewer.pal(8, "Dark2"))
-  
-  jeopCorpus_2 <- Corpus(VectorSource(tos_structure_2$TI %>% na.omit()))
+  jeopCorpus_2 <- Corpus(VectorSource(subarea_2$TI %>% na.omit()))
   
   paperCorp_2 <- jeopCorpus_2
   paperCorp_2 <- tm_map(paperCorp_2, removePunctuation)
@@ -444,11 +440,7 @@ wordclouds <- function (tos_structure_1, tos_structure_2, tos_structure_3) {
   paperCorp_2 <- tm_map(paperCorp_2, removeWords, c("viral", 
                                                   "market"))
   
-  nube2 <- wordcloud(paperCorp_2, min.freq = 1,
-                     max.words=50, random.order=FALSE, rot.per=0.35, 
-                     colors=brewer.pal(8, "Dark2"))
-  
-  jeopCorpus_3 <- Corpus(VectorSource(tos_structure_3$TI %>% na.omit()))
+  jeopCorpus_3 <- Corpus(VectorSource(subarea_3$TI %>% na.omit()))
   
   paperCorp_3 <- jeopCorpus_3
   paperCorp_3 <- tm_map(paperCorp_3, removePunctuation)

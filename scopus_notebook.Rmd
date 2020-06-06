@@ -89,8 +89,7 @@ This is your wordcloud 1
 ```{r warning=FALSE}
 paperCorp_1 <- tm_map(paper$wordclouds$wordcloud_1, 
                       removeWords, 
-                      c("viral",
-                        "market")) 
+                      c("scientometr")) 
 wordcloud(paperCorp_1, 
           min.freq = 1,
           max.words=50, 
@@ -102,11 +101,10 @@ wordcloud(paperCorp_1,
 
 This is your wordcloud 2
 
-```{r}
+```{r warning=FALSE}
 paperCorp_2 <- tm_map(paper$wordclouds$wordcloud_2, 
                       removeWords, 
-                      c("viral",
-                        "market")) 
+                      c("scientometr")) 
 wordcloud(paperCorp_2, 
           min.freq = 1,
           max.words=50, 
@@ -121,8 +119,7 @@ This is your wordcloud 3
 ```{r message=FALSE, warning=FALSE}
 paperCorp_3 <- tm_map(paper$wordclouds$wordcloud_3, 
                       removeWords, 
-                      c("viral",
-                        "market")) 
+                      c("scientometr")) 
 wordcloud(paperCorp_3, 
           min.freq = 1,
           max.words=50, 

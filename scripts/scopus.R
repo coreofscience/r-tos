@@ -12,11 +12,13 @@ tos_scopus <- function(fileinput) {
   # Create ToS table
   tos_structure <- tos_labels(graph, titles)
   # Calculate subareas
-  graph_subareas <- sub_area(graph)
+  graph_subareas <- sub_area(graph, titles)
   # Importance of the topic 
   importance <- importance_bibliometrix(scopus_dataframe)
   # Word clouds
-  wordclouds_all <- wordclouds(tos_structure_1,tos_structure_1,tos_structure_1)
+  wordclouds_all <- wordclouds(graph_subareas$subarea_1,
+                               graph_subareas$subarea_2,
+                               graph_subareas$subarea_3)
   
   list(scopus = scopus_dataframe,
        network = graph,
