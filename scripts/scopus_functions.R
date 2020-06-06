@@ -153,6 +153,9 @@ tos_labels <- function(graph, titles) {
     left_join(titles,
               by = c("id" = "SR_TOS"))
   
+  tos_structure <- 
+    tos_structure[!duplicated(tos_structure$id),]
+  
   return(tos_structure)
 }
 
@@ -239,11 +242,14 @@ importance_bibliometrix <- function (scopus_dataframe) {
     filter(years > 2001,
            years < year(Sys.Date())) %>% 
     ggplot(aes(x = years, y = papers)) +
-    geom_line()
+    geom_line() + 
+    ggtitle("Scientific anual production")
   
   author_pccion <- 
     as_tibble(importance_biblio$Authors) %>% 
-    head(15)
+    head(15) %>% 
+    rename(Author = "AU",
+           Publications = "n")
   
   journals_pccion <- 
     as_tibble(importance_biblio$Sources) %>% 
