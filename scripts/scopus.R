@@ -13,8 +13,8 @@ tos_scopus <- function(fileinput) {
   graph_subareas <- sub_area(graph)
   
   list(scopus = scopus_dataframe,
-          network = graph,
-          tos = tos_structure,
-          subareas = graph_subareas)
+       network = graph,
+       tos = tos_structure,
+       subareas = graph_subareas)
   
 }

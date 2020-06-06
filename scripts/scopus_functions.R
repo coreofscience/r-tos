@@ -12,9 +12,13 @@ if (!require(igraph)) {
 
 # Read scopus bibtex
 read_scopus_file <- function (scopus_file) {
-  scopus_dataframe <- convert2df(scopus_file, 
-                                 dbsource = "scopus", 
-                                 format = "bibtex")
+  scopus_dataframe <- 
+    convert2df(scopus_file,
+               dbsource = "scopus",
+               format = "bibtex") %>% 
+    as_tibble() %>% 
+    mutate(SR_TOS = str_c(SR,SO))
+  
   return(scopus_dataframe)
 }
 
@@ -22,8 +26,7 @@ read_scopus_file <- function (scopus_file) {
 
 edge_list_scopus <- function (scopus_dataframe) {
   edge_list <-
-    as_tibble(scopus_dataframe) %>%
-    mutate(SR_TOS = str_c(SR,SO)) %>% 
+    scopus_dataframe %>%
     separate_rows(CR, sep = "; ") %>%  # the CR data is removed here, something to improve strsplit could be an option
     mutate(lastname = sub("\\., .*", "", CR),
            lastname = sub(",", "", lastname),
@@ -35,8 +38,19 @@ edge_list_scopus <- function (scopus_dataframe) {
     mutate(CR_SO = str_match(CR, pattern = "\\([0-9]{4}\\)\\s*(.*?)\\s*,")[,2],
            CR_SO = str_c(lastname, ", ", year, ", ", CR_SO)) %>% 
     filter(CR_SO != "") %>% 
-    select(SR_TOS, CR_SO) %>% 
+    mutate(TITLE = str_extract(CR, ".*\\(([0-9]{4})\\)"),
+           TITLE = str_remove(TITLE, "^(.*)[\\.,]"),
+           TITLE = str_remove(TITLE, "\\(([0-9]{4})\\)"),
+           TITLE = str_trim(TITLE)) %>% 
+    select(SR_TOS, CR_SO, TITLE) %>% 
     unique()
+  
+  step1 <- 
+  step2 <- str_remove(step1, "")
+  step3 <- str_remove(step2, "")
+  step4 <- str_trim(step3)
+    
+    str_view(step1, )
   
   return(edge_list)
 }
