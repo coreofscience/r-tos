@@ -3,11 +3,73 @@ title: "Scopus cienciometría"
 output: html_notebook
 ---
 
-En esta parte se carga el archivo
+# Creating environment 
 
 ```{r message=FALSE, warning=FALSE}
 source("scripts/scopus.R")
+```
+
+# Getting data
+
+En esta parte se carga el archivo
+
+```{r message=FALSE, warning=FALSE}
 arbol <- tos_scopus("data/scientometrics_465.bib")
 ```
+
+## Importance 
+
+In this part, you will suport your research topic through a scientometrics analysis. Bibliometrix package helps us with it, please cite it in your paper 
+
+Aria, M. & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive science mapping analysis, Journal of Informetrics, 11(4), pp 959-975, Elsevier, DOI: 10.1016/j.joi.2017.08.007
+
+### Anual scientific production 
+
+### Most productive autors
+
+### Most popular journals 
+
+## Evolution Tree of Science
+
+This part shows the papers through the analogy of a tree 
+
+```{r}
+
+```
+
+## Subareas of your topic
+
+This figure shows the amount of papers for each cluster. It will help you to select the subareas. 
+
+```{r}
+
+```
+
+The graph with the subareas selected
+
+```{r}
+
+```
+
+
+this is the table of subarea 1
+
+```{r}
+
+```
+
+This is the table of subarea 2 
+
+```{r}
+
+```
+
+This is the table of subarea 3 
+```{r}
+
+```
+
+
+
 
 
