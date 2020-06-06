@@ -351,6 +351,23 @@ sub_area <- function (graph) {
     ylab("papers") +
     ggtitle("Relationship of subareas by size")
   
+  graph_subareas_plot <- 
+    delete.vertices(graph,
+                    which(V(graph)$sub_area != subareas_3$subarea[1] &
+                            V(graph)$sub_area != subareas_3$subarea[2] &
+                            V(graph)$sub_area != subareas_3$subarea[3]))
+  
+  colr = c("red", "brown", "blue")
+  V(graph_subareas_plot)$color <- ifelse(V(graph_subareas_plot)$sub_area == subareas_3$subarea[1], "red",
+                                         ifelse(V(graph_subareas_plot)$sub_area == subareas_3$subarea[2], "blue", 
+                                                "green"))
+  
+  graph_subareas_ploting <- 
+  plot(graph_subareas_plot,
+       vertex.color=V(graph_subareas_plot)$color,
+       vertex.label = "", 
+       layout = layout.fruchterman.reingold)
+  
   list(subarea_1 = tos_structure_1,
          subarea_2 = tos_structure_1,
          subarea_3 = tos_structure_1,
