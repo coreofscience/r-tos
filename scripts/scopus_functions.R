@@ -10,6 +10,10 @@ if (!require(igraph)) {
   install.packages("igraph")
 }
 
+if (!require(lubridate)) {
+  install.packages("lubridate")
+}
+
 # Read scopus bibtex
 read_scopus_file <- function (scopus_file) {
   scopus_dataframe <- 
@@ -332,8 +336,23 @@ sub_area <- function (graph) {
     ylab("papers") +
     ggtitle("Relationship of subareas by size")
   
-  list(subarea_1 = sub_area_net_metrics_1,
-         subarea_2 = sub_area_net_metrics_2,
-         subarea_3 = sub_area_net_metrics_3,
+  list(subarea_1 = tos_structure_1,
+         subarea_2 = tos_structure_1,
+         subarea_3 = tos_structure_1,
          tipping_poing = subareas_plot)
 }
+
+importance_bibliometrix <- function (scopus_dataframe) {
+  importance_biblio <- 
+    biblioAnalysis(scopus_dataframe)
+  
+  anual_pccion <- 
+    tibble(years = importance_biblio$Years,
+           papers = importance_biblio$nAUperPaper) %>% 
+    group_by(years) %>% 
+    summarise(papers = sum(papers)) %>% 
+    arrange(desc(years)) 
+  
+  list(anual_pccion = anual_pccion)
+} 
+  

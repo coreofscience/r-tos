@@ -25,6 +25,11 @@ Aria, M. & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive scie
 
 ### Anual scientific production 
 
+```{r}
+
+```
+
+
 ### Most productive autors
 
 ### Most popular journals 
