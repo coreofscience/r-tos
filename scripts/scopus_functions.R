@@ -464,7 +464,8 @@ wordclouds <- function (tos_structure_1, tos_structure_2, tos_structure_3) {
   paperCorp_3 <- tm_map(paperCorp_3, removeWords, c("viral", 
                                                     "market"))
   
-  nube3 <- wordcloud(paperCorp_3, min.freq = 1,
-                     max.words=50, random.order=FALSE, rot.per=0.35, 
-                     colors=brewer.pal(8, "Dark2"))
+  
+  list(wordcloud_1 = paperCorp_1,
+       wordcloud_2 = paperCorp_2,
+       wordcloud_3 = paperCorp_3)
 }

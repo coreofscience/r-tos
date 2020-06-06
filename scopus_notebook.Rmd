@@ -82,6 +82,55 @@ This is the table of subarea 3
 paper$subareas$subarea_3
 ```
 
+Do you want to know what is the topic of each subarea?  Below you will find wordclouds to help you whit it. 
+
+This is your wordcloud 1
+
+```{r warning=FALSE}
+paperCorp_1 <- tm_map(paper$wordclouds$wordcloud_1, 
+                      removeWords, 
+                      c("viral",
+                        "market")) 
+wordcloud(paperCorp_1, 
+          min.freq = 1,
+          max.words=50, 
+          random.order=FALSE, 
+          rot.per=0.35,
+          colors=brewer.pal(8, 
+                            "Dark2"))
+```
+
+This is your wordcloud 2
+
+```{r}
+paperCorp_2 <- tm_map(paper$wordclouds$wordcloud_2, 
+                      removeWords, 
+                      c("viral",
+                        "market")) 
+wordcloud(paperCorp_2, 
+          min.freq = 1,
+          max.words=50, 
+          random.order=FALSE, 
+          rot.per=0.35,
+          colors=brewer.pal(8, 
+                            "Dark2"))
+```
+
+This is your wordcloud 3
+
+```{r message=FALSE, warning=FALSE}
+paperCorp_3 <- tm_map(paper$wordclouds$wordcloud_3, 
+                      removeWords, 
+                      c("viral",
+                        "market")) 
+wordcloud(paperCorp_3, 
+          min.freq = 1,
+          max.words=50, 
+          random.order=FALSE, 
+          rot.per=0.35,
+          colors=brewer.pal(8, 
+                            "Dark2"))
+```
 
 
 

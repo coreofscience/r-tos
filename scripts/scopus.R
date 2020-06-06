@@ -15,11 +15,14 @@ tos_scopus <- function(fileinput) {
   graph_subareas <- sub_area(graph)
   # Importance of the topic 
   importance <- importance_bibliometrix(scopus_dataframe)
+  # Word clouds
+  wordclouds_all <- wordclouds(tos_structure_1,tos_structure_1,tos_structure_1)
   
   list(scopus = scopus_dataframe,
        network = graph,
        tos = tos_structure,
        subareas = graph_subareas,
-       pccion_anual = importance)
+       pccion_anual = importance,
+       wordclouds = wordclouds_all)
   
 }
