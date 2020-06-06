@@ -154,7 +154,6 @@ tos_labels <- function(graph) {
   tos_structure <- 
     tos_structure[!duplicated(tos_structure$id),]
     
-  
   return(tos_structure)
 }
 
@@ -182,7 +181,44 @@ sub_area <- function (graph) {
                         mode = "out"),
      bet = betweenness(graph_subarea_1)
     )
-
+  
+  roots_1 <- 
+    sub_area_net_metrics_1 %>% 
+    filter(outdegree == 0) %>% 
+    arrange(desc(indegree)) %>%
+    head(10) %>% 
+    mutate(tos = "raiz",
+           order = 1:length(tos)) %>% 
+    select(-indegree,
+           -outdegree,
+           -bet)
+  
+  trunk_1 <- 
+    sub_area_net_metrics_1 %>% 
+    arrange(desc(bet)) %>% 
+    head(10) %>% 
+    mutate(tos = "tronco",
+           order = 1:length(tos)) %>% 
+    select(-indegree,
+           -outdegree,
+           -bet)
+  
+  leaves_1 <- 
+    sub_area_net_metrics_1 %>% 
+    filter(indegree == 0) %>% 
+    arrange(desc(indegree)) %>% 
+    head(60) %>% 
+    mutate(tos = "hoja",
+           order = 1:length(tos)) %>% 
+    select(-indegree,
+           -outdegree,
+           -bet)
+  
+  tos_structure_1 <- 
+    bind_rows(roots_1,
+              trunk_1,
+              leaves_1) 
+  
   graph_subarea_2 <- 
     graph %>% 
     delete_vertices(V(graph)$sub_area != subareas_3$subarea[2])
@@ -197,6 +233,43 @@ sub_area <- function (graph) {
       bet = betweenness(graph_subarea_2)
     )
   
+  roots_2 <- 
+    sub_area_net_metrics_2 %>% 
+    filter(outdegree == 0) %>% 
+    arrange(desc(indegree)) %>%
+    head(10) %>% 
+    mutate(tos = "raiz",
+           order = 1:length(tos)) %>% 
+    select(-indegree,
+           -outdegree,
+           -bet)
+  
+  trunk_2 <- 
+    sub_area_net_metrics_2 %>% 
+    arrange(desc(bet)) %>% 
+    head(10) %>% 
+    mutate(tos = "tronco",
+           order = 1:length(tos)) %>% 
+    select(-indegree,
+           -outdegree,
+           -bet)
+  
+  leaves_2 <- 
+    sub_area_net_metrics_2 %>% 
+    filter(indegree == 0) %>% 
+    arrange(desc(indegree)) %>% 
+    head(60) %>% 
+    mutate(tos = "hoja",
+           order = 1:length(tos)) %>% 
+    select(-indegree,
+           -outdegree,
+           -bet)
+  
+  tos_structure_2 <- 
+    bind_rows(roots_2,
+              trunk_2,
+              leaves_2) 
+  
   graph_subarea_3 <- 
     graph %>% 
     delete_vertices(V(graph)$sub_area != subareas_3$subarea[3])
@@ -210,6 +283,43 @@ sub_area <- function (graph) {
                          mode = "out"),
       bet = betweenness(graph_subarea_3)
     )
+  
+  roots_3 <- 
+    sub_area_net_metrics_3 %>% 
+    filter(outdegree == 0) %>% 
+    arrange(desc(indegree)) %>%
+    head(10) %>% 
+    mutate(tos = "raiz",
+           order = 1:length(tos)) %>% 
+    select(-indegree,
+           -outdegree,
+           -bet)
+  
+  trunk_3 <- 
+    sub_area_net_metrics_3 %>% 
+    arrange(desc(bet)) %>% 
+    head(10) %>% 
+    mutate(tos = "tronco",
+           order = 1:length(tos)) %>% 
+    select(-indegree,
+           -outdegree,
+           -bet)
+  
+  leaves_3 <- 
+    sub_area_net_metrics_3 %>% 
+    filter(indegree == 0) %>% 
+    arrange(desc(indegree)) %>% 
+    head(60) %>% 
+    mutate(tos = "hoja",
+           order = 1:length(tos)) %>% 
+    select(-indegree,
+           -outdegree,
+           -bet)
+  
+  tos_structure_3 <- 
+    bind_rows(roots_3,
+              trunk_3,
+              leaves_3) 
   
   subareas_plot <-
     tibble(subareas = V(graph)$sub_area) %>% 
