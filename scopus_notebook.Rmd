@@ -1,0 +1,134 @@
+---
+title: "Scopus cienciometría"
+output: html_notebook
+---
+
+# Creating environment 
+
+```{r message=FALSE, warning=FALSE}
+source("scripts/scopus.R")
+```
+
+# Getting data
+
+En esta parte se carga el archivo
+
+```{r message=FALSE, warning=FALSE}
+paper <- tos_scopus("data/scientometrics_465.bib")
+```
+
+## Importance 
+
+In this part, you will suport your research topic through a scientometrics analysis. Bibliometrix package helps us with it, please cite it in your paper 
+
+Aria, M. & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive science mapping analysis, Journal of Informetrics, 11(4), pp 959-975, Elsevier, DOI: 10.1016/j.joi.2017.08.007
+
+### Anual scientific production 
+
+```{r}
+paper$pccion_anual$anual_pccion
+```
+
+
+### Most productive autors
+
+```{r warning=FALSE}
+paper$pccion_anual$author_pccion
+```
+
+
+### Most popular journals 
+
+## Evolution Tree of Science
+
+This part shows the papers through the analogy of a tree 
+
+```{r warning=TRUE}
+paper$tos
+```
+
+## Subareas of your topic
+
+This figure shows the amount of papers for each cluster. It will help you to select the subareas. 
+
+```{r warning=FALSE}
+paper$subareas$tipping_poing
+```
+
+The graph with the subareas selected
+
+```{r}
+plot(paper$subareas$graph_subareas_network,
+         vertex.color=V(paper$subareas$graph_subareas_network)$color,
+         vertex.label = "", 
+         layout = layout.fruchterman.reingold)
+```
+
+
+this is the table of subarea 1
+
+```{r warning=FALSE}
+paper$subareas$subarea_1
+```
+
+This is the table of subarea 2 
+
+```{r}
+paper$subareas$subarea_2
+```
+
+This is the table of subarea 3 
+```{r}
+paper$subareas$subarea_3
+```
+
+Do you want to know what is the topic of each subarea?  Below you will find wordclouds to help you whit it. 
+
+This is your wordcloud 1
+
+```{r warning=FALSE}
+paperCorp_1 <- tm_map(paper$wordclouds$wordcloud_1, 
+                      removeWords, 
+                      c("scientometr")) 
+wordcloud(paperCorp_1, 
+          min.freq = 1,
+          max.words=50, 
+          random.order=FALSE, 
+          rot.per=0.35,
+          colors=brewer.pal(8, 
+                            "Dark2"))
+```
+
+This is your wordcloud 2
+
+```{r warning=FALSE}
+paperCorp_2 <- tm_map(paper$wordclouds$wordcloud_2, 
+                      removeWords, 
+                      c("scientometr")) 
+wordcloud(paperCorp_2, 
+          min.freq = 1,
+          max.words=50, 
+          random.order=FALSE, 
+          rot.per=0.35,
+          colors=brewer.pal(8, 
+                            "Dark2"))
+```
+
+This is your wordcloud 3
+
+```{r message=FALSE, warning=FALSE}
+paperCorp_3 <- tm_map(paper$wordclouds$wordcloud_3, 
+                      removeWords, 
+                      c("scientometr")) 
+wordcloud(paperCorp_3, 
+          min.freq = 1,
+          max.words=50, 
+          random.order=FALSE, 
+          rot.per=0.35,
+          colors=brewer.pal(8, 
+                            "Dark2"))
+```
+
+
+
+
