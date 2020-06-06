@@ -44,17 +44,28 @@ edge_list_scopus <- function (scopus_dataframe) {
            TITLE = str_trim(TITLE)) %>% 
     select(SR_TOS, CR_SO, TITLE) %>% 
     unique()
-  
-  step1 <- 
-  step2 <- str_remove(step1, "")
-  step3 <- str_remove(step2, "")
-  step4 <- str_trim(step3)
-    
-    str_view(step1, )
-  
+
   return(edge_list)
 }
 
+titles_scopus <- function (scopus_dataframe, edge_list) {
+  titles_orig <- 
+    scopus_dataframe %>% 
+    select(SR_TOS, TI)
+  
+  titles <- 
+    edge_list %>% 
+    select(CR_SO,
+           TITLE) %>%
+    anti_join(titles_orig,
+              by = c("CR_SO" = "SR_TOS")) %>% 
+    rename(SR_TOS = "CR_SO",
+           TI = "TITLE") %>% 
+    bind_rows(titles_orig)
+    
+}
+  
+  
 graph_scopus <- function (edge_list) {
   graph_raw <- 
     graph.data.frame(edge_list,
