@@ -42,8 +42,8 @@ edge_list_scopus <- function (scopus_dataframe) {
            TITLE = str_remove(TITLE, "^(.*)[\\.,]"),
            TITLE = str_remove(TITLE, "\\(([0-9]{4})\\)"),
            TITLE = str_trim(TITLE)) %>% 
-    select(SR_TOS, CR_SO, TITLE) %>% 
-    unique()
+    select(SR_TOS, CR_SO, TITLE)
+    
 
   return(edge_list)
 }
@@ -61,14 +61,18 @@ titles_scopus <- function (scopus_dataframe, edge_list) {
               by = c("CR_SO" = "SR_TOS")) %>% 
     rename(SR_TOS = "CR_SO",
            TI = "TITLE") %>% 
-    bind_rows(titles_orig)
+    bind_rows(titles_orig) %>% 
+    unique()
     
 }
   
   
 graph_scopus <- function (edge_list) {
   graph_raw <- 
-    graph.data.frame(edge_list,
+    graph.data.frame(edge_list %>% 
+                       select(SR_TOS,
+                              CR_SO) %>% 
+                      unique(),
                      directed = TRUE) %>% 
     simplify() 
   
@@ -143,7 +147,13 @@ tos_labels <- function(graph) {
   tos_structure <- 
     bind_rows(roots,
               trunk,
-              leaves)
+              leaves) %>% 
+    left_join(titles,
+              by = c("id" = "SR_TOS"))
+  
+  tos_structure <- 
+    tos_structure[!duplicated(tos_structure$id),]
+    
   
   return(tos_structure)
 }
