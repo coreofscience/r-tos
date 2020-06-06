@@ -14,6 +14,14 @@ if (!require(lubridate)) {
   install.packages("lubridate")
 }
 
+if (!require(tm)) {
+  install.packages("tm")
+}
+
+if (!require(wordcloud)) {
+  install.packages("wordcloud")
+}
+
 # Read scopus bibtex
 read_scopus_file <- function (scopus_file) {
   scopus_dataframe <- 
@@ -396,4 +404,67 @@ importance_bibliometrix <- function (scopus_dataframe) {
   list(anual_pccion = anual_pccion_plot,
        author_pccion = author_pccion,
        journals_pccion = journals_pccion)
+}
+
+wordclouds <- function (tos_structure_1, tos_structure_2, tos_structure_3) {
+  
+  jeopCorpus <- Corpus(VectorSource(tos_structure_1$TI %>% na.omit()))
+  
+  paperCorp <- jeopCorpus
+  paperCorp <- tm_map(paperCorp, removePunctuation)
+  paperCorp <- tm_map(paperCorp, removeNumbers)
+  # added tolower
+  paperCorp <- tm_map(paperCorp, content_transformer(tolower))
+  paperCorp <- tm_map(paperCorp, removeWords, stopwords("english"))
+  # moved stripWhitespace
+  
+  paperCorp <- tm_map(paperCorp, stripWhitespace)
+  paperCorp <- tm_map(paperCorp, stemDocument)
+  
+  paperCorp_1 <- tm_map(paperCorp, removeWords, c("viral", 
+                                                  "market"))
+  
+  nube1 <- wordcloud(paperCorp_1, min.freq = 1,
+                     max.words=50, random.order=FALSE, rot.per=0.35, 
+                     colors=brewer.pal(8, "Dark2"))
+  
+  jeopCorpus_2 <- Corpus(VectorSource(tos_structure_2$TI %>% na.omit()))
+  
+  paperCorp_2 <- jeopCorpus_2
+  paperCorp_2 <- tm_map(paperCorp_2, removePunctuation)
+  paperCorp_2 <- tm_map(paperCorp_2, removeNumbers)
+  # added tolower
+  paperCorp_2 <- tm_map(paperCorp_2, content_transformer(tolower))
+  paperCorp_2 <- tm_map(paperCorp_2, removeWords, stopwords("english"))
+  # moved stripWhitespace
+  
+  paperCorp_2 <- tm_map(paperCorp_2, stripWhitespace)
+  paperCorp_2 <- tm_map(paperCorp_2, stemDocument)
+  
+  paperCorp_2 <- tm_map(paperCorp_2, removeWords, c("viral", 
+                                                  "market"))
+  
+  nube2 <- wordcloud(paperCorp_2, min.freq = 1,
+                     max.words=50, random.order=FALSE, rot.per=0.35, 
+                     colors=brewer.pal(8, "Dark2"))
+  
+  jeopCorpus_3 <- Corpus(VectorSource(tos_structure_3$TI %>% na.omit()))
+  
+  paperCorp_3 <- jeopCorpus_3
+  paperCorp_3 <- tm_map(paperCorp_3, removePunctuation)
+  paperCorp_3 <- tm_map(paperCorp_3, removeNumbers)
+  # added tolower
+  paperCorp_3 <- tm_map(paperCorp_3, content_transformer(tolower))
+  paperCorp_3 <- tm_map(paperCorp_3, removeWords, stopwords("english"))
+  # moved stripWhitespace
+  
+  paperCorp_3 <- tm_map(paperCorp_3, stripWhitespace)
+  paperCorp_3 <- tm_map(paperCorp_3, stemDocument)
+  
+  paperCorp_3 <- tm_map(paperCorp_3, removeWords, c("viral", 
+                                                    "market"))
+  
+  nube3 <- wordcloud(paperCorp_3, min.freq = 1,
+                     max.words=50, random.order=FALSE, rot.per=0.35, 
+                     colors=brewer.pal(8, "Dark2"))
 }
