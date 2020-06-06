@@ -221,7 +221,12 @@ sub_area <- function (graph) {
   tos_structure_1 <- 
     bind_rows(roots_1,
               trunk_1,
-              leaves_1) 
+              leaves_1) %>% 
+    left_join(titles,
+              by = c("id" = "SR_TOS"))
+  
+  tos_structure_1 <- 
+    tos_structure_1[!duplicated(tos_structure_1$id),]
   
   graph_subarea_2 <- 
     graph %>% 
@@ -272,7 +277,12 @@ sub_area <- function (graph) {
   tos_structure_2 <- 
     bind_rows(roots_2,
               trunk_2,
-              leaves_2) 
+              leaves_2) %>% 
+    left_join(titles,
+              by = c("id" = "SR_TOS"))
+  
+  tos_structure_2 <- 
+    tos_structure_2[!duplicated(tos_structure_2$id),]
   
   graph_subarea_3 <- 
     graph %>% 
@@ -323,7 +333,12 @@ sub_area <- function (graph) {
   tos_structure_3 <- 
     bind_rows(roots_3,
               trunk_3,
-              leaves_3) 
+              leaves_3) %>% 
+    left_join(titles,
+              by = c("id" = "SR_TOS"))
+  
+  tos_structure_3 <- 
+    tos_structure_3[!duplicated(tos_structure_3$id),]
   
   subareas_plot <-
     tibble(subareas = V(graph)$sub_area) %>% 
@@ -361,6 +376,8 @@ importance_bibliometrix <- function (scopus_dataframe) {
     as_tibble(importance_biblio$Sources) %>% 
     head(15)
   
-  list(anual_pccion = anual_pccion)
+  list(anual_pccion = anual_pccion,
+       author_pccion = author_pccion,
+       journals_pccion = journals_pccion)
 } 
   

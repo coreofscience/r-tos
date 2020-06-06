@@ -11,6 +11,8 @@ tos_scopus <- function(fileinput) {
   tos_structure <- tos_labels(graph)
   # Calculate subareas
   graph_subareas <- sub_area(graph)
+  # Importance of the topic 
+  importance <- importance_bibliometrix(scopus_dataframe)
   
   list(scopus = scopus_dataframe,
        network = graph,
