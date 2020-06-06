@@ -353,6 +353,10 @@ importance_bibliometrix <- function (scopus_dataframe) {
     summarise(papers = sum(papers)) %>% 
     arrange(desc(years)) 
   
+  author_pccion <- 
+    as_tibble(importance_biblio$Authors) %>% 
+    head(15)
+  
   list(anual_pccion = anual_pccion)
 } 
   
