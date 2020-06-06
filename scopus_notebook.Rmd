@@ -51,14 +51,17 @@ paper$tos
 
 This figure shows the amount of papers for each cluster. It will help you to select the subareas. 
 
-```{r}
+```{r warning=FALSE}
 paper$subareas$tipping_poing
 ```
 
 The graph with the subareas selected
 
 ```{r}
-
+plot(paper$subareas$graph_subareas_network,
+         vertex.color=V(paper$subareas$graph_subareas_network)$color,
+         vertex.label = "", 
+         layout = layout.fruchterman.reingold)
 ```
 
 

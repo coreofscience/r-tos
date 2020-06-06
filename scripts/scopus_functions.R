@@ -184,6 +184,48 @@ sub_area <- function (graph) {
      bet = betweenness(graph_subarea_1)
     )
 
+  roots_1 <- 
+    sub_area_net_metrics_1 %>% 
+    filter(outdegree == 0) %>% 
+    arrange(desc(indegree)) %>%
+    head(10) %>% 
+    mutate(tos = "raiz",
+           order = 1:length(tos)) %>% 
+    select(-indegree,
+           -outdegree,
+           -bet)
+  
+  trunk_1 <- 
+    sub_area_net_metrics_1 %>% 
+    arrange(desc(bet)) %>% 
+    head(10) %>% 
+    mutate(tos = "tronco",
+           order = 1:length(tos)) %>% 
+    select(-indegree,
+           -outdegree,
+           -bet)
+  
+  leaves_1 <- 
+    sub_area_net_metrics_1 %>% 
+    filter(indegree == 0) %>% 
+    arrange(desc(indegree)) %>% 
+    head(60) %>% 
+    mutate(tos = "hoja",
+           order = 1:length(tos)) %>% 
+    select(-indegree,
+           -outdegree,
+           -bet)
+  
+  tos_structure_1 <- 
+    bind_rows(roots_1,
+              trunk_1,
+              leaves_1) %>% 
+    left_join(titles,
+              by = c("id" = "SR_TOS"))
+  
+  tos_structure_1 <- 
+    tos_structure_1[!duplicated(tos_structure_1$id),]
+  
   graph_subarea_2 <- 
     graph %>% 
     delete_vertices(V(graph)$sub_area != subareas_3$subarea[2])
@@ -197,6 +239,48 @@ sub_area <- function (graph) {
                          mode = "out"),
       bet = betweenness(graph_subarea_2)
     )
+  
+  roots_2 <- 
+    sub_area_net_metrics_2 %>% 
+    filter(outdegree == 0) %>% 
+    arrange(desc(indegree)) %>%
+    head(10) %>% 
+    mutate(tos = "raiz",
+           order = 1:length(tos)) %>% 
+    select(-indegree,
+           -outdegree,
+           -bet)
+  
+  trunk_2 <- 
+    sub_area_net_metrics_2 %>% 
+    arrange(desc(bet)) %>% 
+    head(10) %>% 
+    mutate(tos = "tronco",
+           order = 1:length(tos)) %>% 
+    select(-indegree,
+           -outdegree,
+           -bet)
+  
+  leaves_2 <- 
+    sub_area_net_metrics_2 %>% 
+    filter(indegree == 0) %>% 
+    arrange(desc(indegree)) %>% 
+    head(60) %>% 
+    mutate(tos = "hoja",
+           order = 1:length(tos)) %>% 
+    select(-indegree,
+           -outdegree,
+           -bet)
+  
+  tos_structure_2 <- 
+    bind_rows(roots_2,
+              trunk_2,
+              leaves_2) %>% 
+    left_join(titles,
+              by = c("id" = "SR_TOS"))
+  
+  tos_structure_2 <- 
+    tos_structure_2[!duplicated(tos_structure_2$id),]
   
   graph_subarea_3 <- 
     graph %>% 
@@ -212,6 +296,48 @@ sub_area <- function (graph) {
       bet = betweenness(graph_subarea_3)
     )
   
+  roots_3 <- 
+    sub_area_net_metrics_3 %>% 
+    filter(outdegree == 0) %>% 
+    arrange(desc(indegree)) %>%
+    head(10) %>% 
+    mutate(tos = "raiz",
+           order = 1:length(tos)) %>% 
+    select(-indegree,
+           -outdegree,
+           -bet)
+  
+  trunk_3 <- 
+    sub_area_net_metrics_3 %>% 
+    arrange(desc(bet)) %>% 
+    head(10) %>% 
+    mutate(tos = "tronco",
+           order = 1:length(tos)) %>% 
+    select(-indegree,
+           -outdegree,
+           -bet)
+  
+  leaves_3 <- 
+    sub_area_net_metrics_3 %>% 
+    filter(indegree == 0) %>% 
+    arrange(desc(indegree)) %>% 
+    head(60) %>% 
+    mutate(tos = "hoja",
+           order = 1:length(tos)) %>% 
+    select(-indegree,
+           -outdegree,
+           -bet)
+  
+  tos_structure_3 <- 
+    bind_rows(roots_3,
+              trunk_3,
+              leaves_3) %>% 
+    left_join(titles,
+              by = c("id" = "SR_TOS"))
+  
+  tos_structure_3 <- 
+    tos_structure_3[!duplicated(tos_structure_3$id),]
+  
   subareas_plot <-
     tibble(subareas = V(graph)$sub_area) %>% 
     group_by(subareas) %>%
@@ -223,10 +349,22 @@ sub_area <- function (graph) {
     ylab("papers") +
     ggtitle("Relationship of subareas by size")
   
-  list(subarea_1 = sub_area_net_metrics_1,
-         subarea_2 = sub_area_net_metrics_2,
-         subarea_3 = sub_area_net_metrics_3,
-         tipping_poing = subareas_plot)
+  graph_subareas_plot <- 
+    delete.vertices(graph,
+                    which(V(graph)$sub_area != subareas_3$subarea[1] &
+                            V(graph)$sub_area != subareas_3$subarea[2] &
+                            V(graph)$sub_area != subareas_3$subarea[3]))
+   
+    colr = c("red", "brown", "blue")
+  V(graph_subareas_plot)$color <- ifelse(V(graph_subareas_plot)$sub_area == subareas_3$subarea[1], "red",
+                                         ifelse(V(graph_subareas_plot)$sub_area == subareas_3$subarea[2], "blue", 
+                                                "green"))
+  
+  list(subarea_1 = tos_structure_1,
+         subarea_2 = tos_structure_1,
+         subarea_3 = tos_structure_1,
+         tipping_poing = subareas_plot,
+       graph_subareas_network = graph_subareas_plot)
 }
 
 importance_bibliometrix <- function (scopus_dataframe) {
