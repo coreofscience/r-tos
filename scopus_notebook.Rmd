@@ -14,7 +14,7 @@ source("scripts/scopus.R")
 En esta parte se carga el archivo
 
 ```{r message=FALSE, warning=FALSE}
-arbol <- tos_scopus("data/scientometrics_465.bib")
+paper <- tos_scopus("data/scientometrics_465.bib")
 ```
 
 ## Importance 
@@ -26,11 +26,16 @@ Aria, M. & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive scie
 ### Anual scientific production 
 
 ```{r}
-
+paper$pccion_anual$anual_pccion
 ```
 
 
 ### Most productive autors
+
+```{r warning=FALSE}
+paper$pccion_anual$author_pccion
+```
+
 
 ### Most popular journals 
 
@@ -38,8 +43,8 @@ Aria, M. & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive scie
 
 This part shows the papers through the analogy of a tree 
 
-```{r}
-
+```{r warning=TRUE}
+paper$tos
 ```
 
 ## Subareas of your topic
@@ -47,7 +52,7 @@ This part shows the papers through the analogy of a tree
 This figure shows the amount of papers for each cluster. It will help you to select the subareas. 
 
 ```{r}
-
+paper$subareas$tipping_poing
 ```
 
 The graph with the subareas selected
@@ -59,19 +64,19 @@ The graph with the subareas selected
 
 this is the table of subarea 1
 
-```{r}
-
+```{r warning=FALSE}
+paper$subareas$subarea_1
 ```
 
 This is the table of subarea 2 
 
 ```{r}
-
+paper$subareas$subarea_2
 ```
 
 This is the table of subarea 3 
 ```{r}
-
+paper$subareas$subarea_3
 ```
 
 
