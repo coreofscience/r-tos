@@ -357,6 +357,10 @@ importance_bibliometrix <- function (scopus_dataframe) {
     as_tibble(importance_biblio$Authors) %>% 
     head(15)
   
+  journals_pccion <- 
+    as_tibble(importance_biblio$Sources) %>% 
+    head(15)
+  
   list(anual_pccion = anual_pccion)
 } 
   
