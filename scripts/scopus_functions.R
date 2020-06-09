@@ -125,7 +125,7 @@ tos_labels <- function(graph, titles) {
   roots <- 
     network_metrics %>% 
     filter(outdegree == 0) %>% 
-    arrange(desc(indegree)) %>%
+    arrange(desc(bet)) %>%
     head(10) %>% 
     mutate(tos = "raiz",
            order = 1:length(tos)) %>% 
