@@ -14,7 +14,7 @@ source("scripts/scopus.R")
 En esta parte se carga el archivo
 
 ```{r message=FALSE, warning=FALSE}
-paper <- tos_scopus("data/scientometrics_465.bib")
+paper <- tos_scopus(file.choose())
 ```
 
 ## Importance 
