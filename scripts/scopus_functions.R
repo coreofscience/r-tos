@@ -29,7 +29,11 @@ read_scopus_file <- function (scopus_file) {
                dbsource = "scopus",
                format = "bibtex") %>% 
     as_tibble() %>% 
-    mutate(SR_TOS = str_c(SR,SO))
+    mutate(SR_TOS = str_extract(SR, one_or_more(WRD) %R%
+                                 SPC %R% one_or_more(WRD) %R%
+                                 "," %R% SPC %R% 
+                                 one_or_more(DGT) %R% ","),
+           SR_TOS = str_c(SR_TOS, " ", SO))
   
   return(scopus_dataframe)
 }
@@ -125,7 +129,7 @@ tos_labels <- function(graph, titles) {
   roots <- 
     network_metrics %>% 
     filter(outdegree == 0) %>% 
-    arrange(desc(bet)) %>%
+    arrange(desc(indegree)) %>% 
     head(10) %>% 
     mutate(tos = "raiz",
            order = 1:length(tos)) %>% 
@@ -146,7 +150,7 @@ tos_labels <- function(graph, titles) {
   leaves <- 
     network_metrics %>% 
     filter(indegree == 0) %>% 
-    arrange(desc(indegree)) %>% 
+    arrange(desc(outdegree)) %>% 
     head(60) %>% 
     mutate(tos = "hoja",
            order = 1:length(tos)) %>% 
