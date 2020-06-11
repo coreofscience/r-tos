@@ -22,6 +22,10 @@ if (!require(wordcloud)) {
   install.packages("wordcloud")
 }
 
+if (!require(gt)) {
+  install.packages("gt")
+}
+
 # Read scopus bibtex
 read_scopus_file <- function (scopus_file) {
   scopus_dataframe <- 
