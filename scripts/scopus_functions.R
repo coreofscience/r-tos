@@ -26,6 +26,10 @@ if (!require(gt)) {
   install.packages("gt")
 }
 
+if (!require(rebus)) {
+  install.packages("rebus")
+}
+
 # Read scopus bibtex
 read_scopus_file <- function (scopus_file) {
   scopus_dataframe <- 
@@ -40,6 +44,12 @@ read_scopus_file <- function (scopus_file) {
            SR_TOS = str_c(SR_TOS, " ", SO))
   
   return(scopus_dataframe)
+}
+
+# Create a df with CRs
+
+cr_dfs <- function() {
+  
 }
 
 # Create the edgelist
