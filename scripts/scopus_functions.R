@@ -50,6 +50,19 @@ read_scopus_file <- function (scopus_file) {
 
 cr_dfs <- function() {
   
+  pattern_authors <- 
+    SPC %R% 
+    one_or_more(WRD) %R%
+    SPC %R%
+    one_or_more(or(WRD, ANY_CHAR))
+  
+  cited_references <- 
+    scopus_dataframe %>%
+    separate_rows(CR, sep = "; ") %>% 
+    select(SR_TOS, CR) %>% 
+    mutate(AU = str_remove(CR, pattern_authors))
+
+  
 }
 
 # Create the edgelist
