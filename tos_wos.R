@@ -1,3 +1,12 @@
+library(bibliometrix)
+library(tidyverse)
+library(igraph)
+library(lubridate)
+library(tm)
+library(wordcloud)
+library(gt)
+library(rebus)
+
 tos_wos <- function(biblio_wos) {
   
   tos_wos_ref <- 
