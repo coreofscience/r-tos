@@ -56,11 +56,44 @@ cr_dfs <- function() {
     SPC %R%
     one_or_more(or(WRD, ANY_CHAR))
   
+  pattern_titles <- 
+    OPEN_PAREN %R% 
+    repeated(DGT, 4) %R% 
+    CLOSE_PAREN %R%
+    one_or_more(or(WRD,ANY_CHAR))
+  
+  pattern_year <- 
+    OPEN_PAREN %R% 
+    repeated(DGT, 4) %R% 
+    CLOSE_PAREN 
+  
+  pattern_journal <- 
+    one_or_more(or(WRD,SPC))
+  
+  pattern_volume <-
+    one_or_more(or(WRD, SPC))
+  
+  pattern_pages <- 
+    "PP. " %R%
+    one_or_more(or(DGT, ANY_CHAR))
+  
   cited_references <- 
     scopus_dataframe %>%
     separate_rows(CR, sep = "; ") %>% 
-    select(SR_TOS, CR) %>% 
-    mutate(AU = str_remove(CR, pattern_authors))
+    select(SR_TOS, 
+           CR) %>% 
+    mutate(CR_AUTHOR = str_remove(CR, pattern_authors),
+           CR_TITLE_1 = str_extract(CR, pattern_authors),
+           CR_TITLE = str_remove(CR_TITLE_1, pattern_titles),
+           CR_TITLE = str_trim(CR_TITLE),
+           CR_YEAR_1 <- str_extract(CR_TITLE_1, pattern_titles),
+           CR_YEAR = str_extract(CR_YEAR_1, pattern_year),
+           CR_JOURNAL_1 = str_remove(CR_YEAR_1, pattern_year),
+           CR_JOURNAL = str_extract(CR_JOURNAL_1, pattern_journal),
+           CR_JOURNAL = str_trim(CR_JOURNAL),
+           CR_VOLUME_1 = str_remove(CR_JOURNAL_1, pattern_journal),
+           CR_VOLUME = str_extract(CR_VOLUME_1, pattern_volume),
+           CR_PAGES = str_extract(CR_VOLUME_1, pattern_pages)) 
 
   
 }
