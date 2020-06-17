@@ -88,12 +88,23 @@ cr_dfs <- function() {
            CR_TITLE = str_trim(CR_TITLE),
            CR_YEAR_1 <- str_extract(CR_TITLE_1, pattern_titles),
            CR_YEAR = str_extract(CR_YEAR_1, pattern_year),
+           CR_YEAR = str_remove(CR_YEAR, OPEN_PAREN),
+           CR_YEAR = str_remove(CR_YEAR, CLOSE_PAREN),
            CR_JOURNAL_1 = str_remove(CR_YEAR_1, pattern_year),
            CR_JOURNAL = str_extract(CR_JOURNAL_1, pattern_journal),
            CR_JOURNAL = str_trim(CR_JOURNAL),
            CR_VOLUME_1 = str_remove(CR_JOURNAL_1, pattern_journal),
            CR_VOLUME = str_extract(CR_VOLUME_1, pattern_volume),
-           CR_PAGES = str_extract(CR_VOLUME_1, pattern_pages)) 
+           CR_PAGES = str_extract(CR_VOLUME_1, pattern_pages),
+           CR_PAGES = str_remove(CR_PAGES, "PP. ")) %>% 
+    select(SR_TOS, 
+           CR, 
+           CR_AUTHOR, 
+           CR_TITLE, 
+           CR_YEAR, 
+           CR_JOURNAL, 
+           CR_VOLUME, 
+           CR_PAGES)
 
   
 }
