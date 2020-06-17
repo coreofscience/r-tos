@@ -87,9 +87,7 @@ cr_dfs <- function() {
            CR_TITLE = str_remove(CR_TITLE_1, pattern_titles),
            CR_TITLE = str_trim(CR_TITLE),
            CR_YEAR_1 <- str_extract(CR_TITLE_1, pattern_titles),
-           CR_YEAR = str_extract(CR_YEAR_1, pattern_year),
-           CR_YEAR = str_remove(CR_YEAR, OPEN_PAREN),
-           CR_YEAR = str_remove(CR_YEAR, CLOSE_PAREN),
+           CR_YEAR = str_extract(CR_YEAR_1, repeated(DGT, 4)),
            CR_JOURNAL_1 = str_remove(CR_YEAR_1, pattern_year),
            CR_JOURNAL = str_extract(CR_JOURNAL_1, pattern_journal),
            CR_JOURNAL = str_trim(CR_JOURNAL),
@@ -104,7 +102,8 @@ cr_dfs <- function() {
            CR_YEAR, 
            CR_JOURNAL, 
            CR_VOLUME, 
-           CR_PAGES)
+           CR_PAGES) %>% 
+    mutate()
 
   
 }
