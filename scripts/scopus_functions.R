@@ -110,7 +110,8 @@ cr_dfs <- function() {
                          ", ",
                          CR_YEAR,
                          ", ",
-                         CR_JOURNAL))
+                         CR_JOURNAL)) %>% 
+    select(-lastname)
 
   
 }
@@ -137,6 +138,12 @@ edge_list_scopus <- function (scopus_dataframe) {
            TITLE = str_trim(TITLE)) %>% 
     select(SR_TOS, CR_SO, TITLE) %>% 
     unique()
+  
+  edge_list <-
+    cited_references %>% 
+    select(SR_TOS, 
+           CR_SO) %>% 
+    na.omit()
 
   return(edge_list)
 }
@@ -242,8 +249,43 @@ tos_labels <- function(graph, titles) {
     left_join(titles,
               by = c("id" = "SR_TOS"))
   
+  tos_scopus_df <- 
+    tos_structure %>% 
+    left_join(scopus_dataframe %>% 
+                select(SR_TOS,
+                       TI,
+                       PY,
+                       AU,
+                       SO),
+              by = c("id" = "SR_TOS")) %>% 
+    rename(TITLE = "TI",
+           YEAR = "PY",
+           AUTHOR = "AU",
+           JOURNAL = "SO")
+  
+  tos_cited_ref <-
+    tos_scopus_df %>% 
+    filter(is.na(TITLE)) %>%
+    select(id,
+           tos,
+           order) %>% 
+    left_join(cited_references %>% 
+                select(CR_SO,
+                       CR_TITLE,
+                       CR_YEAR,
+                       CR_AUTHOR,
+                       CR_JOURNAL),
+              by = c("id" = "CR_SO")) %>% 
+    filter(!duplicated(id)) %>% 
+    rename(TITLE = "CR_TITLE",
+           YEAR = "CR_YEAR",
+           AUTHOR = "CR_AUTHOR",
+           JOURNAL = "CR_JOURNAL")
+  
   tos_structure <- 
-    tos_structure[!duplicated(tos_structure$id),]
+    rbind(tos_cited_ref,
+          tos_scopus_df %>%
+            filter(!is.na(TITLE)))
   
   return(tos_structure)
 }
