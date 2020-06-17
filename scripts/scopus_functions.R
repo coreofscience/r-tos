@@ -48,7 +48,7 @@ read_scopus_file <- function (scopus_file) {
 
 # Create a df with CRs
 
-cr_dfs <- function() {
+cr_dfs <- function(scopus_dataframe) {
   
   pattern_authors <- 
     SPC %R% 
@@ -113,38 +113,18 @@ cr_dfs <- function() {
                          CR_JOURNAL)) %>% 
     select(-lastname)
 
-  
 }
 
 # Create the edgelist
 
 edge_list_scopus <- function (scopus_dataframe) {
-  edge_list <-
-    scopus_dataframe %>%
-    separate_rows(CR, sep = "; ") %>%  # the CR data is removed here, something to improve strsplit could be an option
-    mutate(lastname = sub("\\., .*", "", CR),
-           lastname = sub(",", "", lastname),
-           lastname = sub("\\.", "", lastname),# extracting lastnames,
-           year = str_extract(CR, "\\(([0-9]{4})\\)"),
-           year = str_remove_all(year, "\\(|\\)")) %>% 
-    filter(!grepl(pattern = "[():[:digit:]]", lastname),
-           str_length(year) == 4) %>% 
-    mutate(CR_SO = str_match(CR, pattern = "\\([0-9]{4}\\)\\s*(.*?)\\s*,")[,2],
-           CR_SO = str_c(lastname, ", ", year, ", ", CR_SO)) %>% 
-    filter(CR_SO != "") %>% 
-    mutate(TITLE = str_extract(CR, ".*\\(([0-9]{4})\\)"),
-           TITLE = str_remove(TITLE, "^(.*)[\\.,]"),
-           TITLE = str_remove(TITLE, "\\(([0-9]{4})\\)"),
-           TITLE = str_trim(TITLE)) %>% 
-    select(SR_TOS, CR_SO, TITLE) %>% 
-    unique()
-  
+ 
   edge_list <-
     cited_references %>% 
     select(SR_TOS, 
            CR_SO) %>% 
     na.omit()
-
+  
   return(edge_list)
 }
 
@@ -245,9 +225,7 @@ tos_labels <- function(graph, titles) {
   tos_structure <- 
     bind_rows(roots,
               trunk,
-              leaves) %>% 
-    left_join(titles,
-              by = c("id" = "SR_TOS"))
+              leaves) 
   
   tos_scopus_df <- 
     tos_structure %>% 
@@ -285,7 +263,14 @@ tos_labels <- function(graph, titles) {
   tos_structure <- 
     rbind(tos_cited_ref,
           tos_scopus_df %>%
-            filter(!is.na(TITLE)))
+            filter(!is.na(TITLE))) %>% 
+    select(order,
+           tos,
+           TITLE,
+           YEAR,
+           AUTHOR,
+           JOURNAL,
+           id)
   
   return(tos_structure)
 }
