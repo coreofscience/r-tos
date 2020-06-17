@@ -103,7 +103,14 @@ cr_dfs <- function() {
            CR_JOURNAL, 
            CR_VOLUME, 
            CR_PAGES) %>% 
-    mutate()
+    mutate(lastname = sub("\\., .*", "", CR),
+           lastname = sub(",", "", lastname),
+           lastname = sub("\\.", "", lastname),
+           CR_SO = str_c(lastname, 
+                         ", ",
+                         CR_YEAR,
+                         ", ",
+                         CR_JOURNAL))
 
   
 }
