@@ -22,6 +22,14 @@ if (!require(wordcloud)) {
   install.packages("wordcloud")
 }
 
+if (!require(gt)) {
+  install.packages("gt")
+}
+
+if (!require(rebus)) {
+  install.packages("rebus")
+}
+
 # Read scopus bibtex
 read_scopus_file <- function (scopus_file) {
   scopus_dataframe <- 
@@ -29,34 +37,96 @@ read_scopus_file <- function (scopus_file) {
                dbsource = "scopus",
                format = "bibtex") %>% 
     as_tibble() %>% 
-    mutate(SR_TOS = str_c(SR,SO))
+    mutate(SR_TOS = str_extract(SR, one_or_more(WRD) %R%
+                                 SPC %R% one_or_more(WRD) %R%
+                                 "," %R% SPC %R% 
+                                 one_or_more(DGT) %R% ","),
+           SR_TOS = str_c(SR_TOS, " ", SO))
   
   return(scopus_dataframe)
+}
+
+# Create a df with CRs
+
+cited_references_df <- function(scopus_dataframe) {
+  
+  pattern_authors <- 
+    SPC %R% 
+    one_or_more(WRD) %R%
+    SPC %R%
+    one_or_more(or(WRD, ANY_CHAR))
+  
+  pattern_titles <- 
+    OPEN_PAREN %R% 
+    repeated(DGT, 4) %R% 
+    CLOSE_PAREN %R%
+    one_or_more(or(WRD,ANY_CHAR))
+  
+  pattern_year <- 
+    OPEN_PAREN %R% 
+    repeated(DGT, 4) %R% 
+    CLOSE_PAREN 
+  
+  pattern_journal <- 
+    one_or_more(or(WRD,SPC))
+  
+  pattern_volume <-
+    one_or_more(or(WRD, SPC))
+  
+  pattern_pages <- 
+    "PP. " %R%
+    one_or_more(or(DGT, ANY_CHAR))
+  
+  cited_references <- 
+    scopus_dataframe %>%
+    separate_rows(CR, sep = "; ") %>% 
+    select(SR_TOS, 
+           CR) %>% 
+    mutate(CR_AUTHOR = str_remove(CR, pattern_authors),
+           CR_TITLE_1 = str_extract(CR, pattern_authors),
+           CR_TITLE = str_remove(CR_TITLE_1, pattern_titles),
+           CR_TITLE = str_trim(CR_TITLE),
+           CR_YEAR_1 <- str_extract(CR_TITLE_1, pattern_titles),
+           CR_YEAR = str_extract(CR_YEAR_1, repeated(DGT, 4)),
+           CR_JOURNAL_1 = str_remove(CR_YEAR_1, pattern_year),
+           CR_JOURNAL = str_extract(CR_JOURNAL_1, pattern_journal),
+           CR_JOURNAL = str_trim(CR_JOURNAL),
+           CR_VOLUME_1 = str_remove(CR_JOURNAL_1, pattern_journal),
+           CR_VOLUME = str_extract(CR_VOLUME_1, pattern_volume),
+           CR_PAGES = str_extract(CR_VOLUME_1, pattern_pages),
+           CR_PAGES = str_remove(CR_PAGES, "PP. ")) %>% 
+    select(SR_TOS, 
+           CR, 
+           CR_AUTHOR, 
+           CR_TITLE, 
+           CR_YEAR, 
+           CR_JOURNAL, 
+           CR_VOLUME, 
+           CR_PAGES) %>% 
+    mutate(lastname = sub("\\., .*", "", CR),
+           lastname = sub(",", "", lastname),
+           lastname = sub("\\.", "", lastname),
+           CR_SO = str_c(lastname, 
+                         ", ",
+                         CR_YEAR,
+                         ", ",
+                         CR_JOURNAL)) %>% 
+    select(-lastname)
+  
+  return(cited_references)
+
 }
 
 # Create the edgelist
 
 edge_list_scopus <- function (scopus_dataframe) {
+ 
   edge_list <-
-    scopus_dataframe %>%
-    separate_rows(CR, sep = "; ") %>%  # the CR data is removed here, something to improve strsplit could be an option
-    mutate(lastname = sub("\\., .*", "", CR),
-           lastname = sub(",", "", lastname),
-           lastname = sub("\\.", "", lastname),# extracting lastnames,
-           year = str_extract(CR, "\\(([0-9]{4})\\)"),
-           year = str_remove_all(year, "\\(|\\)")) %>% 
-    filter(!grepl(pattern = "[():[:digit:]]", lastname),
-           str_length(year) == 4) %>% 
-    mutate(CR_SO = str_match(CR, pattern = "\\([0-9]{4}\\)\\s*(.*?)\\s*,")[,2],
-           CR_SO = str_c(lastname, ", ", year, ", ", CR_SO)) %>% 
-    filter(CR_SO != "") %>% 
-    mutate(TITLE = str_extract(CR, ".*\\(([0-9]{4})\\)"),
-           TITLE = str_remove(TITLE, "^(.*)[\\.,]"),
-           TITLE = str_remove(TITLE, "\\(([0-9]{4})\\)"),
-           TITLE = str_trim(TITLE)) %>% 
-    select(SR_TOS, CR_SO, TITLE) %>% 
-    unique()
-
+    cited_references %>% 
+    select(SR_TOS, 
+           CR_SO) %>% 
+    na.omit()
+  
   return(edge_list)
 }
 
@@ -80,7 +150,14 @@ titles_scopus <- function (scopus_dataframe, edge_list) {
 }
   
   
-graph_scopus <- function (edge_list) {
+graph_scopus <- function (cited_references) {
+  
+  edge_list <-
+    cited_references %>% 
+    select(SR_TOS, 
+           CR_SO) %>% 
+    na.omit()
+  
   graph_raw <- 
     graph.data.frame(edge_list,
                      directed = TRUE) %>% 
@@ -114,7 +191,8 @@ graph_scopus <- function (edge_list) {
   return(graph)
 }
 
-tos_labels <- function(graph, titles) {
+tos_labels <- function(graph, cited_references, scopus_dataframe) {
+  
   network_metrics <- tibble(
     id = V(graph)$name,
     indegree = degree(graph, mode = "in"),
@@ -125,7 +203,7 @@ tos_labels <- function(graph, titles) {
   roots <- 
     network_metrics %>% 
     filter(outdegree == 0) %>% 
-    arrange(desc(indegree)) %>%
+    arrange(desc(indegree)) %>% 
     head(10) %>% 
     mutate(tos = "raiz",
            order = 1:length(tos)) %>% 
@@ -146,7 +224,7 @@ tos_labels <- function(graph, titles) {
   leaves <- 
     network_metrics %>% 
     filter(indegree == 0) %>% 
-    arrange(desc(indegree)) %>% 
+    arrange(desc(outdegree)) %>% 
     head(60) %>% 
     mutate(tos = "hoja",
            order = 1:length(tos)) %>% 
@@ -157,17 +235,57 @@ tos_labels <- function(graph, titles) {
   tos_structure <- 
     bind_rows(roots,
               trunk,
-              leaves) %>% 
-    left_join(titles,
-              by = c("id" = "SR_TOS"))
+              leaves) 
+  
+  tos_scopus_df <- 
+    tos_structure %>% 
+    left_join(scopus_dataframe %>% 
+                select(SR_TOS,
+                       TI,
+                       PY,
+                       AU,
+                       SO),
+              by = c("id" = "SR_TOS")) %>% 
+    rename(TITLE = "TI",
+           YEAR = "PY",
+           AUTHOR = "AU",
+           JOURNAL = "SO")
+  
+  tos_cited_ref <-
+    tos_scopus_df %>% 
+    filter(is.na(TITLE)) %>%
+    select(id,
+           tos,
+           order) %>% 
+    left_join(cited_references %>% 
+                select(CR_SO,
+                       CR_TITLE,
+                       CR_YEAR,
+                       CR_AUTHOR,
+                       CR_JOURNAL),
+              by = c("id" = "CR_SO")) %>% 
+    filter(!duplicated(id)) %>% 
+    rename(TITLE = "CR_TITLE",
+           YEAR = "CR_YEAR",
+           AUTHOR = "CR_AUTHOR",
+           JOURNAL = "CR_JOURNAL")
   
   tos_structure <- 
-    tos_structure[!duplicated(tos_structure$id),]
+    rbind(tos_cited_ref,
+          tos_scopus_df %>%
+            filter(!is.na(TITLE))) %>% 
+    select(order,
+           tos,
+           TITLE,
+           YEAR,
+           AUTHOR,
+           JOURNAL,
+           id)
   
   return(tos_structure)
 }
 
-sub_area <- function (graph, titles) {
+sub_area <- function (graph, cited_references, scopus_dataframe) {
   # Identify the first three clusters
   subareas_3 <- 
     tibble(
@@ -224,15 +342,52 @@ sub_area <- function (graph, titles) {
            -outdegree,
            -bet)
   
-  tos_structure_1 <- 
+  tos_scopus_subarea_1 <- 
     bind_rows(roots_1,
               trunk_1,
               leaves_1) %>% 
-    left_join(titles,
-              by = c("id" = "SR_TOS"))
+    left_join(scopus_dataframe %>% 
+                select(SR_TOS,
+                       TI,
+                       PY,
+                       AU,
+                       SO),
+              by = c("id" = "SR_TOS")) %>% 
+    rename(TITLE = "TI",
+           YEAR = "PY",
+           AUTHOR = "AU",
+           JOURNAL = "SO")
+  
+  tos_cited_ref_subarea_1 <-
+    tos_scopus_subarea_1 %>% 
+    filter(is.na(TITLE)) %>%
+    select(id,
+           tos,
+           order) %>% 
+    left_join(cited_references %>% 
+                select(CR_SO,
+                       CR_TITLE,
+                       CR_YEAR,
+                       CR_AUTHOR,
+                       CR_JOURNAL),
+              by = c("id" = "CR_SO")) %>% 
+    filter(!duplicated(id)) %>% 
+    rename(TITLE = "CR_TITLE",
+           YEAR = "CR_YEAR",
+           AUTHOR = "CR_AUTHOR",
+           JOURNAL = "CR_JOURNAL")
   
   tos_structure_1 <- 
-    tos_structure_1[!duplicated(tos_structure_1$id),]
+    rbind(tos_cited_ref_subarea_1,
+          tos_scopus_subarea_1 %>%
+            filter(!is.na(TITLE))) %>% 
+    select(order,
+           tos,
+           TITLE,
+           YEAR,
+           AUTHOR,
+           JOURNAL,
+           id)
   
   graph_subarea_2 <- 
     graph %>% 
@@ -279,16 +434,56 @@ sub_area <- function (graph, titles) {
     select(-indegree,
            -outdegree,
            -bet)
+  #### Subarea 2 ####
   
-  tos_structure_2 <- 
+  tos_scopus_subarea_2 <- 
     bind_rows(roots_2,
               trunk_2,
               leaves_2) %>% 
-    left_join(titles,
-              by = c("id" = "SR_TOS"))
+    left_join(scopus_dataframe %>% 
+                select(SR_TOS,
+                       TI,
+                       PY,
+                       AU,
+                       SO),
+              by = c("id" = "SR_TOS")) %>% 
+    rename(TITLE = "TI",
+           YEAR = "PY",
+           AUTHOR = "AU",
+           JOURNAL = "SO")
+  
+  tos_cited_ref_subarea_2 <-
+    tos_scopus_subarea_2 %>% 
+    filter(is.na(TITLE)) %>%
+    select(id,
+           tos,
+           order) %>% 
+    left_join(cited_references %>% 
+                select(CR_SO,
+                       CR_TITLE,
+                       CR_YEAR,
+                       CR_AUTHOR,
+                       CR_JOURNAL),
+              by = c("id" = "CR_SO")) %>% 
+    filter(!duplicated(id)) %>% 
+    rename(TITLE = "CR_TITLE",
+           YEAR = "CR_YEAR",
+           AUTHOR = "CR_AUTHOR",
+           JOURNAL = "CR_JOURNAL")
   
   tos_structure_2 <- 
-    tos_structure_2[!duplicated(tos_structure_2$id),]
+    rbind(tos_cited_ref_subarea_2,
+          tos_scopus_subarea_2 %>%
+            filter(!is.na(TITLE))) %>% 
+    select(order,
+           tos,
+           TITLE,
+           YEAR,
+           AUTHOR,
+           JOURNAL,
+           id)
+  
+  #### Subarea 3 ####
   
   graph_subarea_3 <- 
     graph %>% 
@@ -336,15 +531,54 @@ sub_area <- function (graph, titles) {
            -outdegree,
            -bet)
   
-  tos_structure_3 <- 
+  tos_scopus_subarea_3 <- 
     bind_rows(roots_3,
               trunk_3,
               leaves_3) %>% 
-    left_join(titles,
-              by = c("id" = "SR_TOS"))
+    left_join(scopus_dataframe %>% 
+                select(SR_TOS,
+                       TI,
+                       PY,
+                       AU,
+                       SO),
+              by = c("id" = "SR_TOS")) %>% 
+    rename(TITLE = "TI",
+           YEAR = "PY",
+           AUTHOR = "AU",
+           JOURNAL = "SO")
+  
+  tos_cited_ref_subarea_3 <-
+    tos_scopus_subarea_3 %>% 
+    filter(is.na(TITLE)) %>%
+    select(id,
+           tos,
+           order) %>% 
+    left_join(cited_references %>% 
+                select(CR_SO,
+                       CR_TITLE,
+                       CR_YEAR,
+                       CR_AUTHOR,
+                       CR_JOURNAL),
+              by = c("id" = "CR_SO")) %>% 
+    filter(!duplicated(id)) %>% 
+    rename(TITLE = "CR_TITLE",
+           YEAR = "CR_YEAR",
+           AUTHOR = "CR_AUTHOR",
+           JOURNAL = "CR_JOURNAL")
   
   tos_structure_3 <- 
-    tos_structure_3[!duplicated(tos_structure_3$id),]
+    rbind(tos_cited_ref_subarea_3,
+          tos_scopus_subarea_3 %>%
+            filter(!is.na(TITLE))) %>% 
+    select(order,
+           tos,
+           TITLE,
+           YEAR,
+           AUTHOR,
+           JOURNAL,
+           id)
+  
+  #### Plotting subgraphs ####
   
   subareas_plot <-
     tibble(subareas = V(graph)$sub_area) %>% 
@@ -408,7 +642,7 @@ importance_bibliometrix <- function (scopus_dataframe) {
 
 wordclouds <- function (subarea_1, subarea_2, subarea_3) {
   
-  jeopCorpus <- Corpus(VectorSource(subarea_1$TI %>% na.omit()))
+  jeopCorpus <- Corpus(VectorSource(subarea_1$TITLE %>% na.omit()))
   
   paperCorp <- jeopCorpus
   paperCorp <- tm_map(paperCorp, removePunctuation)
@@ -424,7 +658,7 @@ wordclouds <- function (subarea_1, subarea_2, subarea_3) {
   paperCorp_1 <- tm_map(paperCorp, removeWords, c("viral", 
                                                   "market"))
   
-  jeopCorpus_2 <- Corpus(VectorSource(subarea_2$TI %>% na.omit()))
+  jeopCorpus_2 <- Corpus(VectorSource(subarea_2$TITLE %>% na.omit()))
   
   paperCorp_2 <- jeopCorpus_2
   paperCorp_2 <- tm_map(paperCorp_2, removePunctuation)
@@ -440,7 +674,7 @@ wordclouds <- function (subarea_1, subarea_2, subarea_3) {
   paperCorp_2 <- tm_map(paperCorp_2, removeWords, c("viral", 
                                                   "market"))
   
-  jeopCorpus_3 <- Corpus(VectorSource(subarea_3$TI %>% na.omit()))
+  jeopCorpus_3 <- Corpus(VectorSource(subarea_3$TITLE %>% na.omit()))
   
   paperCorp_3 <- jeopCorpus_3
   paperCorp_3 <- tm_map(paperCorp_3, removePunctuation)

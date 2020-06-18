@@ -33,7 +33,7 @@ paper$pccion_anual$anual_pccion
 ### Most productive autors
 
 ```{r warning=FALSE}
-paper$pccion_anual$author_pccion
+paper$pccion_anual$author_pccion %>% gt()
 ```
 
 
@@ -44,7 +44,7 @@ paper$pccion_anual$author_pccion
 This part shows the papers through the analogy of a tree 
 
 ```{r warning=TRUE}
-paper$tos
+paper$tos %>% gt()
 ```
 
 ## Subareas of your topic
@@ -68,18 +68,18 @@ plot(paper$subareas$graph_subareas_network,
 this is the table of subarea 1
 
 ```{r warning=FALSE}
-paper$subareas$subarea_1
+paper$subareas$subarea_1 %>% gt()
 ```
 
 This is the table of subarea 2 
 
 ```{r}
-paper$subareas$subarea_2
+paper$subareas$subarea_2 %>% gt()
 ```
 
 This is the table of subarea 3 
 ```{r}
-paper$subareas$subarea_3
+paper$subareas$subarea_3 %>%  gt()
 ```
 
 Do you want to know what is the topic of each subarea?  Below you will find wordclouds to help you whit it. 
