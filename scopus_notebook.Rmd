@@ -74,7 +74,7 @@ paper$subareas$subarea_1 %>% gt()
 This is the table of subarea 2 
 
 ```{r}
-paper$subareas$subarea_2
+paper$subareas$subarea_2 %>% gt()
 ```
 
 This is the table of subarea 3 
