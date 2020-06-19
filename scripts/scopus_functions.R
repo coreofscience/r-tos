@@ -629,7 +629,8 @@ importance_bibliometrix <- function (scopus_dataframe) {
     as_tibble(importance_biblio$Authors) %>% 
     head(15) %>% 
     rename(Author = "AU",
-           Publications = "n")
+           Publications = "n") %>% 
+    filter(Author != "NA NA")
   
   journals_pccion <- 
     as_tibble(importance_biblio$Sources) %>% 
