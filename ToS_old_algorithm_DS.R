@@ -64,7 +64,7 @@ tos_wos <- function(file) {
     
     graph <- 
         graph.data.frame(edgelist) %>% 
-        simplify(graph)
+        simplify()
     
     graph_1 <- delete.vertices(graph, 
                                which(degree(graph, mode = "in") == 1 & 
