@@ -39,6 +39,13 @@ paper$pccion_anual$author_pccion %>% gt()
 
 ### Most popular journals 
 
+This part shows the most important journals according to their production in your research
+
+```{r}
+paper$pccion_anual$journals_pccion %>% gt()
+```
+
+
 ## Evolution Tree of Science
 
 This part shows the papers through the analogy of a tree 
@@ -129,6 +136,17 @@ wordcloud(paperCorp_3,
                             "Dark2"))
 ```
 
+# Export all data
+
+```{r}
+write_csv(paper$pccion_anual$annual_pccion_data, "annual_pccion_data.csv")
+write_csv(paper$pccion_anual$author_pccion, "author_pccion.csv")
+write_csv(paper$pccion_anual$journals_pccion, "journals_pccion.csv")
+write_csv(paper$tos, "tos.csv")
+write.graph(paper$network, "graph.graphml", "graphml")
+write.graph(paper$subareas$graph_subareas_network, "graph_subareas.graphml", "graphml")
+write_csv(paper$subareas$subareas_all, "subareas.csv")
+```
 
 
 

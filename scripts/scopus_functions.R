@@ -387,7 +387,8 @@ sub_area <- function (graph, cited_references, scopus_dataframe) {
            YEAR,
            AUTHOR,
            JOURNAL,
-           id)
+           id) %>% 
+    mutate(subarea = 1)
   
   graph_subarea_2 <- 
     graph %>% 
@@ -481,7 +482,8 @@ sub_area <- function (graph, cited_references, scopus_dataframe) {
            YEAR,
            AUTHOR,
            JOURNAL,
-           id)
+           id) %>% 
+    mutate(subarea = 2)
   
   #### Subarea 3 ####
   
@@ -576,7 +578,8 @@ sub_area <- function (graph, cited_references, scopus_dataframe) {
            YEAR,
            AUTHOR,
            JOURNAL,
-           id)
+           id) %>% 
+    mutate(subarea = 3)
   
   #### Plotting subgraphs ####
   
@@ -605,6 +608,9 @@ sub_area <- function (graph, cited_references, scopus_dataframe) {
   list(subarea_1 = tos_structure_1,
          subarea_2 = tos_structure_2,
          subarea_3 = tos_structure_3,
+       subareas_all = bind_rows(tos_structure_1,
+                                tos_structure_2,
+                                tos_structure_3),
          tipping_poing = subareas_plot,
        graph_subareas_network = graph_subareas_plot)
 }
@@ -612,6 +618,13 @@ sub_area <- function (graph, cited_references, scopus_dataframe) {
 importance_bibliometrix <- function (scopus_dataframe) {
   importance_biblio <- 
     biblioAnalysis(scopus_dataframe)
+  
+  annual_pccion_data <- 
+    tibble(years = importance_biblio$Years,
+           papers = importance_biblio$nAUperPaper) %>% 
+    group_by(years) %>% 
+    summarise(papers = sum(papers)) %>% 
+    arrange(desc(years))
   
   anual_pccion_plot <- 
     tibble(years = importance_biblio$Years,
@@ -629,13 +642,15 @@ importance_bibliometrix <- function (scopus_dataframe) {
     as_tibble(importance_biblio$Authors) %>% 
     head(15) %>% 
     rename(Author = "AU",
-           Publications = "n")
+           Publications = "n") %>% 
+    filter(Author != "NA NA")
   
   journals_pccion <- 
     as_tibble(importance_biblio$Sources) %>% 
     head(15)
   
-  list(anual_pccion = anual_pccion_plot,
+  list(annual_pccion_data = annual_pccion_data,
+       anual_pccion = anual_pccion_plot,
        author_pccion = author_pccion,
        journals_pccion = journals_pccion)
 }
