@@ -156,7 +156,8 @@ graph_scopus <- function (cited_references) {
     cited_references %>% 
     select(SR_TOS, 
            CR_SO) %>% 
-    na.omit()
+    na.omit() %>% 
+    unique()
   
   graph_raw <- 
     graph.data.frame(edge_list,
