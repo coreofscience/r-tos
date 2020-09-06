@@ -125,7 +125,8 @@ edge_list_scopus <- function (scopus_dataframe) {
     cited_references %>% 
     select(SR_TOS, 
            CR_SO) %>% 
-    na.omit()
+    na.omit() %>% 
+    unique()
   
   return(edge_list)
 }
